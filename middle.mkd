@@ -1,0 +1,25 @@
+# Introduction
+
+Some introduction
+
+## Rationale
+
+Bla bla
+
+# IANA Considerations
+
+DXFR
+
+# Security Considerations
+
+None.
+
+# Acknowledgements
+
+Fame! I'm gonna live forever.
+
+# Changelog
+
+## 00
+
+* Initial document.

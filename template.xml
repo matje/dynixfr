@@ -1,0 +1,72 @@
+<?xml version='1.0' encoding="UTF-8"?>
+<!DOCTYPE rfc SYSTEM 'rfc2629.dtd' [
+<!ENTITY abstract  PUBLIC '' 'abstract.xml'>
+<!ENTITY middle    PUBLIC '' 'middle.xml'>
+<!ENTITY back      PUBLIC '' 'back.xml'>
+
+<!-- informative: nice to know -->
+<!ENTITY RFC.7129 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.7129'>
+
+<!-- normative: need to know -->
+<!ENTITY RFC.1995 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.1995'>
+]>
+
+<?rfc toc="yes"?>
+<?rfc tocompact="no"?>
+<?rfc tocdepth="6"?>
+<?rfc symrefs="yes"?>
+<?rfc sortrefs="yes" ?>
+<?rfc rfcedstyle="yes"?>
+<?rfc strict="yes"?>
+<?rfc autobreaks="yes"?>
+<?rfc compact="yes"?>
+<?rfc subcompact="no"?>
+<rfc ipr="trust200902" category="exp" docName="draft-mekking-dnsext-dynixfr-00">
+<front>
+
+<title abbrev="DYNIXFR">Dynamic Update Incremental Zone Transfer in DNS</title>
+
+        <author initials='W.' surname='Mekking' fullname='W. (Matthijs) Mekking'>
+            <organization>NLnet Labs</organization>
+
+            <address>
+                <postal>
+                    <street>Science Park 400</street>
+                    <street></street>
+                    <city>Amsterdam</city> <region></region>
+                    <code>1098 XH</code>
+                    <country>NL</country>
+                </postal>
+
+                <phone></phone>
+                <email>matthijs@nlnetlabs.nl</email>
+                <uri>http://www.nlnetlabs.nl/</uri>
+            </address>
+        </author>
+
+        <date day="5" month='March' year='2014' />
+
+        <area>Internet</area>
+        <workgroup>DNSEXT</workgroup>
+        <keyword>DNS</keyword>
+        <keyword>IXFR</keyword>
+        <abstract>
+            &abstract;
+        </abstract>
+</front>
+
+<middle>
+    &middle;
+</middle>
+
+<back>
+<references title="Informative References">
+        &RFC.7129;
+</references>
+
+<references title="Normative References">
+        &RFC.1995;
+</references>
+    &back;
+</back>
+</rfc>
