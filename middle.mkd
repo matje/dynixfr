@@ -46,7 +46,13 @@ One RR is added whose NAME is that of the apex of the zone. TYPE must be
 specified as the TYPE of the RRsets to be deleted. CLASS must be specified as
 ANY. RDLENGTH must be zero (0) and RDATA must therefore be empty.
 
+## Other possibilities
+
+REPLACE (Johan), Grammar (Olafur) 
+
 # Protocol Description
+
+## Server side
 
 A server receiving a dynamic zone transfer (DXFR) request will reply with
 a DXFR. A DXFR looks exactly like an IXFR, except there may be zero or more
