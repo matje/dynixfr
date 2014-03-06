@@ -12,10 +12,12 @@ update syntax, for example like in Dynamic Update (DNS UPDATE, [](#RFC2136).
 This document introduces a new query type DXFR (dynamic zone transfer) that
 is able to express this richer syntax.
 
-# Protocol Description
+An earlier proposal to keep the zone transfers small is IXFR-ONLY [](#IXFR-ONLY).
 
-DXFR works exactly like IXFR, except the richer syntax allows to add or delete
-multiple records with one resource record (RR).
+# Syntax
+
+The syntax for IXFR is a subset of DXFR, the richer syntax allows to add or
+delete multiple records with one resource record (RR).
 
 ## Add an RR
 
@@ -31,18 +33,46 @@ Similar to DNS UPDATE, one RR is added whose NAME and TYPE are those
 of the RRset to be deleted. CLASS must be specified as ANY.
 RDLENGTH must be zero (0) and RDATA must therefore be empty.
 
-## Delete all RRsets on a name
+## Delete All RRsets on a Name
 
 Similar to DNS UPDATE, one RR is added whose NAME is that of the name
 to be cleansed of RRsets. TYPE must be specified as ANY. CLASS must be
 specified as ANY.  RDLENGTH must be zero (0) and RDATA must therefore be
 empty.
 
-## Delete all RRsets of a type
+## Delete All RRsets of a Type
 
 One RR is added whose NAME is that of the apex of the zone. TYPE must be
 specified as the TYPE of the RRsets to be deleted. CLASS must be specified as
 ANY. RDLENGTH must be zero (0) and RDATA must therefore be empty.
+
+# Protocol Description
+
+A server receiving a dynamic zone transfer (DXFR) request will reply with
+a DXFR. A DXFR looks exactly like an IXFR, except there may be zero or more
+of the new introduced syntax RRs that can add or delete more records.
+For `example.`, the following zone transfer can be send that will
+replace all signatures in the zone with new signatures for the names
+`example.`, `a.example.`, `b.example.` and `c.example.`:
+
+    ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 1337
+    ;; flags: qr ; QUERY: 1, ANSWER: 9, AUTHORITY: 0, ADDITIONAL: 0 
+    ;; QUESTION SECTION:
+    ;; example.    IN    DXFR
+    
+    ;; ANSWER SECTION:
+    example.       IN    SOA    serial=3
+    example.       IN    SOA    serial=1
+    example.       ANY   RRSIG
+    example.       IN    SOA    serial=3
+    example.       IN    RRSIG  rdata
+    a.example.     IN    RRSIG  rdata
+    b.example.     IN    RRSIG  rdata
+    c.example.     IN    RRSIG  rdata
+    example.       IN    SOA    serial=3
+    
+If the DXFR is larger than an AXFR, then the server MAY reply with an AXFR
+instead.
 
 # IANA Considerations
 

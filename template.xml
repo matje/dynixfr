@@ -71,6 +71,19 @@
         &RFC.4035;
         &RFC.5155;
         &RFC.5936;
+	<reference anchor='IXFR-ONLY' target='https://tools.ietf.org/html/draft-kerr-ixfr-only-01'>
+		<front>
+		<title>IXFR-ONLY to Prevent IXFR Fallback to AXFR</title>
+		<author initials='O.' surname='Sury' fullname='Ondrej Sury'>
+			<organization>CZ.NIC</organization>
+		</author>
+		<author initials='S.' surname='Kerr' fullname='Shane Kerr'>
+			<organization>ISC</organization>
+		</author>
+		<date year='2010' month='February' />
+		</front>
+		<format type='HTML' target='https://tools.ietf.org/html/draft-kerr-ixfr-only-01' />
+	</reference>
 </references>
 
 <references title="Normative References">
