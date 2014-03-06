@@ -1,1 +1,3 @@
-DNSSEC increases the delta in IXFR packets.
+This document proposes extensions to the DNS protocol to provide an
+incremental zone transfer (IXFR) mechanism with dynamic update (UPDATE)
+capabilities.

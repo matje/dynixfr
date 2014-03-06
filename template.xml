@@ -5,10 +5,15 @@
 <!ENTITY back      PUBLIC '' 'back.xml'>
 
 <!-- informative: nice to know -->
-<!ENTITY RFC.7129 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.7129'>
+<!ENTITY RFC.4033 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4033'>
+<!ENTITY RFC.4034 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4034'>
+<!ENTITY RFC.4035 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.4035'>
+<!ENTITY RFC.5155 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5155'>
+<!ENTITY RFC.5936 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.5936'>
 
 <!-- normative: need to know -->
 <!ENTITY RFC.1995 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.1995'>
+<!ENTITY RFC.2136 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.2136'>
 ]>
 
 <?rfc toc="yes"?>
@@ -51,7 +56,7 @@
         <keyword>DNS</keyword>
         <keyword>IXFR</keyword>
         <abstract>
-            &abstract;
+	&abstract;
         </abstract>
 </front>
 
@@ -61,11 +66,16 @@
 
 <back>
 <references title="Informative References">
-        &RFC.7129;
+        &RFC.4033;
+        &RFC.4034;
+        &RFC.4035;
+        &RFC.5155;
+        &RFC.5936;
 </references>
 
 <references title="Normative References">
         &RFC.1995;
+        &RFC.2136;
 </references>
     &back;
 </back>
