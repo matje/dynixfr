@@ -4,8 +4,9 @@
 
 DNSEXT                                                        W. Mekking
 Internet-Draft                                                NLnet Labs
-Intended status: Experimental                              March 6, 2014
-Expires: September 7, 2014
+Intended status: Experimental                             O. Gudmundsson
+Expires: September 11, 2014                                Shinkuro Inc.
+                                                          March 10, 2014
 
 
             Dynamic Update Incremental Zone Transfer in DNS
@@ -32,7 +33,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 7, 2014.
+   This Internet-Draft will expire on September 11, 2014.
 
 Copyright Notice
 
@@ -52,8 +53,7 @@ Copyright Notice
 
 
 
-
-Mekking                 Expires September 7, 2014               [Page 1]
+Mekking & Gudmundsson  Expires September 11, 2014               [Page 1]
 
 Internet-Draft                   DYNIXFR                      March 2014
 
@@ -109,7 +109,7 @@ Table of Contents
 
 
 
-Mekking                 Expires September 7, 2014               [Page 2]
+Mekking & Gudmundsson  Expires September 11, 2014               [Page 2]
 
 Internet-Draft                   DYNIXFR                      March 2014
 
@@ -165,7 +165,7 @@ Internet-Draft                   DYNIXFR                      March 2014
 
 
 
-Mekking                 Expires September 7, 2014               [Page 3]
+Mekking & Gudmundsson  Expires September 11, 2014               [Page 3]
 
 Internet-Draft                   DYNIXFR                      March 2014
 
@@ -221,7 +221,7 @@ Internet-Draft                   DYNIXFR                      March 2014
 
 
 
-Mekking                 Expires September 7, 2014               [Page 4]
+Mekking & Gudmundsson  Expires September 11, 2014               [Page 4]
 
 Internet-Draft                   DYNIXFR                      March 2014
 
@@ -277,7 +277,7 @@ Internet-Draft                   DYNIXFR                      March 2014
 
 
 
-Mekking                 Expires September 7, 2014               [Page 5]
+Mekking & Gudmundsson  Expires September 11, 2014               [Page 5]
 
 Internet-Draft                   DYNIXFR                      March 2014
 
@@ -333,7 +333,7 @@ Internet-Draft                   DYNIXFR                      March 2014
 
 
 
-Mekking                 Expires September 7, 2014               [Page 6]
+Mekking & Gudmundsson  Expires September 11, 2014               [Page 6]
 
 Internet-Draft                   DYNIXFR                      March 2014
 
@@ -389,7 +389,7 @@ Internet-Draft                   DYNIXFR                      March 2014
 
 
 
-Mekking                 Expires September 7, 2014               [Page 7]
+Mekking & Gudmundsson  Expires September 11, 2014               [Page 7]
 
 Internet-Draft                   DYNIXFR                      March 2014
 
@@ -398,7 +398,7 @@ Appendix A.  Changelog
 
    o  Initial version
 
-Author's Address
+Authors' Addresses
 
    W. (Matthijs) Mekking
    NLnet Labs
@@ -410,6 +410,13 @@ Author's Address
    URI:   http://www.nlnetlabs.nl/
 
 
+   Olafur Gudmundsson
+   Shinkuro Inc.
+   4922 Fairmont Av, Suite 250
+   Bethesda  MD 20814
+   USA
+
+   EMail: ogud@ogud.com
 
 
 
@@ -438,11 +445,4 @@ Author's Address
 
 
 
-
-
-
-
-
-
-
-Mekking                 Expires September 7, 2014               [Page 8]
+Mekking & Gudmundsson  Expires September 11, 2014               [Page 8]

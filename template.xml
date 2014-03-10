@@ -50,7 +50,25 @@
             </address>
         </author>
 
-        <date day='6' month='March' year='2014' />
+        <author initials='O.' surname='Gudmundsson' fullname='Olafur Gudmundsson'>
+            <organization>Shinkuro Inc.</organization>
+
+            <address>
+                <postal>
+                    <street>4922 Fairmont Av, Suite 250</street>
+                    <street></street>
+                    <city>Bethesda</city> <region></region>
+                    <code>MD 20814</code>
+                    <country>USA</country>
+                </postal>
+
+                <phone></phone>
+                <email>ogud@ogud.com</email>
+                <uri></uri>
+            </address>
+        </author>
+
+        <date day='10' month='March' year='2014' />
 
         <area>Internet</area>
         <workgroup>DNSEXT</workgroup>
