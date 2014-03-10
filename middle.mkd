@@ -17,6 +17,12 @@ IXFR-ONLY [](#IXFR-ONLY), by giving the client an oppurtunity to signal
 the server that it prefers an error above a fall back to an AXFR in case the
 server is not able to send an IXFR.
 
+# Definitions
+
+The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
+"SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
+document are to be interpreted as described in [](#RFC2119).
+
 # Syntax
 
 The syntax for IXFR is a subset of DXFR, the richer syntax fo DXFR allows to
@@ -49,10 +55,6 @@ One RR is added whose NAME is that of the apex of the zone. TYPE must be
 specified as the TYPE of the RRsets to be deleted. CLASS must be specified as
 ANY. RDLENGTH must be zero (0) and RDATA must therefore be empty.
 
-## Other possibilities
-
-REPLACE (Johan), Grammar (Olafur) 
-
 # Protocol Description
 
 ## Client side
@@ -73,6 +75,7 @@ similar to IXFR-ONLY [](#IXFR-ONLY). For example:
     
     ;; ADDITIONAL SECTION:
     example.       IN    SOA    serial=1
+^[fig:a-dxfr-request::A DXFR request for the "example." zone.]
 
 ## Server side
 
@@ -97,10 +100,58 @@ replace all signatures in the zone with new signatures for the names
     a.example.     IN    RRSIG  rdata
     b.example.     IN    RRSIG  rdata
     c.example.     IN    RRSIG  rdata
-    example.       IN    SOA    serial=3
-    
+    example.       IN    SOA    serial=3   
+^[fig:a-dxfr-response::A DXFR response for the "example." zone.]
+
 If the DXFR is larger than an AXFR, then the server MAY reply with an AXFR
 instead.
+
+# Data Minimization
+
+The proposal described in the previous section significantly reduces the size
+of a zone transfer compared with IXFR. However, when a zone has changed its
+NSEC3 salt, the impact is less impressive. This is because you need to
+remove all NSEC3 records and all its corresponding signatures. The first
+part is achieved with:
+
+    example.       ANY   NSEC3
+^[fig:delete-all-nsec3::Record to delete all RRsets of type NSEC3.]
+
+But we can't do the same for part two, because there are other signatures
+than those covering type NSEC3.
+
+However, because RRSIG records are tightly related to its RRset we can
+introduce some additional data minimization rules.
+
+## Delete an RR or an RRset
+
+When deleting an RR or a complete RRset, the IXFR client MUST also
+remove all existing RRSIG records on that RRset. This is valid for all RRtypes
+except RRSIG itself.
+
+## Replace option
+
+Instead of doing a delete RRset and add RRset, we could introdcuce new syntax
+that does a replace RRset. This can save another RR in DXFR per deleted RRset.
+
+Todo: describe syntax for replace
+
+## More optimizations
+
+We can optimize the transfer even more, because when adding an RRset we
+duplicate a lot of owner names, class and type fields. For example. we could
+add an NS RRset of three records like this:
+
+    ADD example. IN NS 3 ns1.example. ns2.example. ns3.example.
+^[fig:add-ns-rrset::Optimized addition of an NS RRset.]
+
+With such a syntax, we can do more things like
+
+    REPLACE       <name> <type> <n> <rdata>{n}
+    REPLACE-RRSIG <name> <type> <n> <rdata>{n}
+    SOA           <serial>
+^[fig:optimized-xfr::Optimized syntax ideas for DXFR.]
+
 
 # IANA Considerations
 
@@ -112,7 +163,7 @@ This document does not introduce additional security considerations.
 
 # Acknowledgements
 
-Fame! I'm gonna live forever.
+Johan Ihren, Tony Finch.
 
 # Changelog
 
