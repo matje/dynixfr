@@ -13,6 +13,7 @@
 
 <!-- normative: need to know -->
 <!ENTITY RFC.1995 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.1995'>
+<!ENTITY RFC.2119 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.2119'>
 <!ENTITY RFC.2136 PUBLIC '' 'http://xml.resource.org/public/rfc/bibxml/reference.RFC.2136'>
 ]>
 
@@ -88,6 +89,7 @@
 
 <references title="Normative References">
         &RFC.1995;
+        &RFC.2119;
         &RFC.2136;
 </references>
     &back;
