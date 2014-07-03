@@ -41,20 +41,21 @@ This works the same as with IXFR.
 
 ## Delete an RRset
 
-Similar to DNS UPDATE, one RR is added whose NAME and TYPE are those
-of the RRset to be deleted. CLASS must be specified as ANY.
-RDLENGTH must be zero (0) and RDATA must therefore be empty.
+Similar to DNS UPDATE. To delete an RRset, the DXFR includes an RR
+whose NAME and TYPE are those of the RRset to be deleted. CLASS must
+be specified as ANY. RDLENGTH must be zero (0) and RDATA must
+therefore be empty.
 
 ## Delete All RRsets on a Name
 
-Similar to DNS UPDATE, one RR is added whose NAME is that of the name
-to be cleansed of RRsets. TYPE must be specified as ANY. CLASS must be
-specified as ANY.  RDLENGTH must be zero (0) and RDATA must therefore be
-empty.
+Similar to DNS UPDATE. To delete all RRSets at a name, the DXFR
+includes an RR at that NAME, whose TYPE must be specified as ANY and
+CLASS must be specified as ANY. RDLENGTH must be zero (0) and RDATA
+must therefore be empty.
 
 ## Delete All RRsets of a Type
 
-One RR is added whose NAME is that of the apex of the zone. TYPE must be
+The DXFR includes an RR whose NAME is that of the apex of the zone. TYPE must be
 specified as the TYPE of the RRsets to be deleted. CLASS must be specified as
 ANY. RDLENGTH must be zero (0) and RDATA must therefore be empty.
 
