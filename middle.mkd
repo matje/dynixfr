@@ -55,18 +55,13 @@ One RR is added whose NAME is that of the apex of the zone. TYPE must be
 specified as the TYPE of the RRsets to be deleted. CLASS must be specified as
 ANY. RDLENGTH must be zero (0) and RDATA must therefore be empty.
 
-## Other possibilities
-
-REPLACE (Johan), More sophisticated grammar (Olafur),
-Implicitly delete RRSIG of RRset (Tony), Get rid of NOTIFY (Tony).
-
 # Protocol Description
 
 ## Client side
 
 The client can send a DXFR request. Just like with IXFR, it can add a SOA
 RR in the authority section to signal the version of the zone it holds now.
-If the client does not want the server to fall back to AXFR, it can add
+If the client does not want the server to fall back to AXFR, it MAY add
 another SOA RR in the additional section. This achieves DXFR-only behavior, 
 similar to IXFR-ONLY [](#IXFR-ONLY). For example:
 
@@ -108,8 +103,9 @@ replace all signatures in the zone with new signatures for the names
     example.       IN    SOA    serial=3   
 ^[fig:a-dxfr-response::A DXFR response for the "example." zone.]
 
-If the DXFR is larger than an AXFR, then the server MAY reply with an AXFR
-instead.
+The server MAY reply with an IXFR or AXFR instead. If the server does
+not implement DXFR it MUST return a response with NOTIMPL rcode. The client
+MUST fallback to request IXFR or AXFR.
 
 # Data Minimization
 
@@ -130,16 +126,14 @@ introduce some additional data minimization rules.
 
 ## Delete an RR or an RRset
 
-When deleting an RR or a complete RRset, the IXFR client MUST also
+When deleting an RR or a complete RRset, the DXFR client MUST also
 remove all existing RRSIG records on that RRset. This is valid for all RRtypes
 except RRSIG itself.
 
 ## Replace option
 
-Instead of doing a delete RRset and add RRset, we could introdcuce new syntax
+Instead of doing a delete RRset and add RRset, we could introduce new syntax
 that does a replace RRset. This can save another RR in DXFR per deleted RRset.
-
-Todo: describe syntax for replace
 
 ## More optimizations
 
@@ -157,6 +151,28 @@ With such a syntax, we can do more things like
     SOA           <serial>
 ^[fig:optimized-xfr::Optimized syntax ideas for DXFR.]
 
+## A more sophisticated grammar
+
+    REPLACE-RRSIG name <type> <n> <rdata>+ 
+    DEL NSEC3 <nsec3param info> ? 
+    REPLACE NSEC3PARAM 
+    REPLACE-NS <name> <n> <rdata>+
+    GLUE <name> <type> <n> <rdata>+
+    SOA <serial>
+^[fig:sophisticated-grammar::More optimizations syntax ideas for DXFR.]
+
+Idea: the whole way to RRset 
+
+    ADD <type> <n> <m> <Rdata>+n  <RRSIG>+m 
+    REPLACE <type> <n><m><Rdata>*n <RRSIG>*m 
+    if only signature then n = 0 
+^[fig:whole-rrset::And more optimizations syntax ideas for DXFR.]
+
+Strictly speaking we can save a few bytes by doing the following in RRSIG: 
+
+    KEY <alg><lables><origTTL><end-time><start-time><key-id><signer>
+
+now the RRSIG parts only need to re real signature. 
 
 # IANA Considerations
 

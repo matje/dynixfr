@@ -68,14 +68,14 @@ Table of Contents
      3.3.  Delete an RRset . . . . . . . . . . . . . . . . . . . . .   3
      3.4.  Delete All RRsets on a Name . . . . . . . . . . . . . . .   3
      3.5.  Delete All RRsets of a Type . . . . . . . . . . . . . . .   3
-     3.6.  Other possibilities . . . . . . . . . . . . . . . . . . .   3
-   4.  Protocol Description  . . . . . . . . . . . . . . . . . . . .   4
-     4.1.  Client side . . . . . . . . . . . . . . . . . . . . . . .   4
+   4.  Protocol Description  . . . . . . . . . . . . . . . . . . . .   3
+     4.1.  Client side . . . . . . . . . . . . . . . . . . . . . . .   3
      4.2.  Server side . . . . . . . . . . . . . . . . . . . . . . .   4
    5.  Data Minimization . . . . . . . . . . . . . . . . . . . . . .   5
      5.1.  Delete an RR or an RRset  . . . . . . . . . . . . . . . .   5
-     5.2.  Replace option  . . . . . . . . . . . . . . . . . . . . .   6
-     5.3.  More optimizations  . . . . . . . . . . . . . . . . . . .   6
+     5.2.  Replace option  . . . . . . . . . . . . . . . . . . . . .   5
+     5.3.  More optimizations  . . . . . . . . . . . . . . . . . . .   5
+     5.4.  A more sophisticated grammar  . . . . . . . . . . . . . .   6
    6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
    7.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
    8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   6
@@ -154,14 +154,14 @@ Internet-Draft                   DYNIXFR                      March 2014
    must be specified as ANY.  RDLENGTH must be zero (0) and RDATA must
    therefore be empty.
 
-3.6.  Other possibilities
+4.  Protocol Description
 
-   REPLACE (Johan), More sophisticated grammar (Olafur), Implicitly
-   delete RRSIG of RRset (Tony), Get rid of NOTIFY (Tony).
+4.1.  Client side
 
-
-
-
+   The client can send a DXFR request.  Just like with IXFR, it can add
+   a SOA RR in the authority section to signal the version of the zone
+   it holds now.  If the client does not want the server to fall back to
+   AXFR, it MAY add another SOA RR in the additional section.  This
 
 
 
@@ -170,14 +170,6 @@ Mekking & Gudmundsson  Expires September 11, 2014               [Page 3]
 Internet-Draft                   DYNIXFR                      March 2014
 
 
-4.  Protocol Description
-
-4.1.  Client side
-
-   The client can send a DXFR request.  Just like with IXFR, it can add
-   a SOA RR in the authority section to signal the version of the zone
-   it holds now.  If the client does not want the server to fall back to
-   AXFR, it can add another SOA RR in the additional section.  This
    achieves DXFR-only behavior, similar to IXFR-ONLY [IXFR-ONLY].  For
    example:
 
@@ -204,28 +196,6 @@ Internet-Draft                   DYNIXFR                      March 2014
    for the names "example.", "a.example.", "b.example." and
    "c.example.":
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Mekking & Gudmundsson  Expires September 11, 2014               [Page 4]
-
-Internet-Draft                   DYNIXFR                      March 2014
-
-
    ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 1337
    ;; flags: qr ; QUERY: 1, ANSWER: 9, AUTHORITY: 0, ADDITIONAL: 0
    ;; QUESTION SECTION:
@@ -244,8 +214,17 @@ Internet-Draft                   DYNIXFR                      March 2014
 
             Figure 2: A DXFR response for the "example." zone.
 
-   If the DXFR is larger than an AXFR, then the server MAY reply with an
-   AXFR instead.
+   The server MAY reply with an IXFR or AXFR instead.  If the server
+   does not implement DXFR it MUST return a response with NOTIMPL rcode.
+   The client MUST fallback to request IXFR or AXFR.
+
+
+
+
+Mekking & Gudmundsson  Expires September 11, 2014               [Page 4]
+
+Internet-Draft                   DYNIXFR                      March 2014
+
 
 5.  Data Minimization
 
@@ -267,28 +246,15 @@ Internet-Draft                   DYNIXFR                      March 2014
 
 5.1.  Delete an RR or an RRset
 
-   When deleting an RR or a complete RRset, the IXFR client MUST also
+   When deleting an RR or a complete RRset, the DXFR client MUST also
    remove all existing RRSIG records on that RRset.  This is valid for
    all RRtypes except RRSIG itself.
 
-
-
-
-
-
-
-Mekking & Gudmundsson  Expires September 11, 2014               [Page 5]
-
-Internet-Draft                   DYNIXFR                      March 2014
-
-
 5.2.  Replace option
 
-   Instead of doing a delete RRset and add RRset, we could introdcuce
-   new syntax that does a replace RRset.  This can save another RR in
-   DXFR per deleted RRset.
-
-   Todo: describe syntax for replace
+   Instead of doing a delete RRset and add RRset, we could introduce new
+   syntax that does a replace RRset.  This can save another RR in DXFR
+   per deleted RRset.
 
 5.3.  More optimizations
 
@@ -307,6 +273,40 @@ Internet-Draft                   DYNIXFR                      March 2014
    SOA           <serial>
 
                 Figure 5: Optimized syntax ideas for DXFR.
+
+
+
+
+Mekking & Gudmundsson  Expires September 11, 2014               [Page 5]
+
+Internet-Draft                   DYNIXFR                      March 2014
+
+
+5.4.  A more sophisticated grammar
+
+   REPLACE-RRSIG name <type> <n> <rdata>+
+   DEL NSEC3 <nsec3param info> ?
+   REPLACE NSEC3PARAM
+   REPLACE-NS <name> <n> <rdata>+
+   GLUE <name> <type> <n> <rdata>+
+   SOA <serial>
+
+            Figure 6: More optimizations syntax ideas for DXFR.
+
+   Idea: the whole way to RRset
+
+   ADD <type> <n> <m> <Rdata>+n  <RRSIG>+m
+   REPLACE <type> <n><m><Rdata>*n <RRSIG>*m
+   if only signature then n = 0
+
+          Figure 7: And more optimizations syntax ideas for DXFR.
+
+   Strictly speaking we can save a few bytes by doing the following in
+   RRSIG:
+
+   KEY <alg><lables><origTTL><end-time><start-time><key-id><signer>
+
+   now the RRSIG parts only need to re real signature.
 
 6.  IANA Considerations
 
