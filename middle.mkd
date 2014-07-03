@@ -86,7 +86,7 @@ similar to IXFR-ONLY [](#IXFR-ONLY). For example:
 A server receiving a dynamic zone transfer (DXFR) request will reply with
 a DXFR. A DXFR looks exactly like an IXFR, except there may be zero or more
 of the new introduced syntax RRs that can add or delete more records.
-For `example.`, the following zone transfer can be send that will
+For the zone `example.`, the following zone transfer can be sent that will
 replace all signatures in the zone with new signatures for the names
 `example.`, `a.example.`, `b.example.` and `c.example.`:
 
