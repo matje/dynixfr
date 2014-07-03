@@ -5,7 +5,9 @@ transfer changed portions of a zone. However, when a zone is signed with
 DNSSEC [](#RFC4033), [](#RFC4034), [](#RFC4035), the transfer may still
 become very large. For example, when many resource record sets (RRsets) need
 a re-sign, or when the NSEC3 [](#RFC5155) salt is changed, an IXFR may
-become larger than a full zone transfer (AXFR, [](#RFC5936)). 
+become larger than a full zone transfer (AXFR, [](#RFC5936)). This is because
+the IXFR includes complete copies of both the deleted and replacement RRSIG
+records.
 
 To keep the deltas small in zone transfers, we need to have a richer
 update syntax, for example like in Dynamic Update (DNS UPDATE, [](#RFC2136).
