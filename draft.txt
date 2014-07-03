@@ -156,8 +156,8 @@ Internet-Draft                   DYNIXFR                      March 2014
 
 3.6.  Other possibilities
 
-   REPLACE (Johan), Grammar (Olafur), Implicitly delete RRSIG of RRset
-   (Tony), Get rid of NOTIFY (Tony).
+   REPLACE (Johan), More sophisticated grammar (Olafur), Implicitly
+   delete RRSIG of RRset (Tony), Get rid of NOTIFY (Tony).
 
 
 
