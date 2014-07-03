@@ -28,7 +28,7 @@ document are to be interpreted as described in [](#RFC2119).
 
 # Syntax
 
-The syntax for IXFR is a subset of DXFR, the richer syntax fo DXFR allows to
+The syntax for IXFR is a subset of DXFR. The richer syntax of DXFR allows to
 add or delete multiple records with one resource record (RR).
 
 ## Add an RR
