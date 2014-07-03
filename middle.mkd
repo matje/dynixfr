@@ -41,37 +41,39 @@ This works the same as with IXFR.
 
 ## Delete an RRset
 
-Similar to DNS UPDATE. To delete an RRset, the DXFR includes an RR
-whose NAME and TYPE are those of the RRset to be deleted. CLASS must
-be specified as ANY. RDLENGTH must be zero (0) and RDATA must
-therefore be empty.
+Similar to DNS UPDATE. To delete an RRset, the DXFR deletion list
+includes an RR whose NAME and TYPE are those of the RRset to be
+deleted. CLASS must be specified as ANY. RDLENGTH must be zero (0) and
+RDATA must therefore be empty.
 
 ## Delete All RRsets on a Name
 
 Similar to DNS UPDATE. To delete all RRSets at a name, the DXFR
-includes an RR at that NAME, whose TYPE must be specified as ANY and
-CLASS must be specified as ANY. RDLENGTH must be zero (0) and RDATA
-must therefore be empty.
+deletion list includes an RR at that NAME, whose TYPE must be
+specified as ANY and CLASS must be specified as ANY. RDLENGTH must be
+zero (0) and RDATA must therefore be empty.
 
 ## Delete All RRsets of a Type
 
-The DXFR includes an RR whose NAME is that of the apex of the zone. TYPE must be
-specified as the TYPE of the RRsets to be deleted. CLASS must be specified as
-ANY. RDLENGTH must be zero (0) and RDATA must therefore be empty.
+The DXFR deletion list includes an RR whose NAME is that of the apex
+of the zone. TYPE must be specified as the TYPE of the RRsets to be
+deleted. CLASS must be specified as ANY. RDLENGTH must be zero (0) and
+RDATA must therefore be empty.
 
 ## Replace an RRset
 
-The DXFR includes an RR whose NAME and TYPE are those of the RRset to
-be replaced. CLASS must be specified as ANY. RDLENGTH must be non-zero
-and the RDATA is that of the first replacement record.
+The DXFR addition list includes an RR whose NAME and TYPE are those of
+the RRset to be replaced. CLASS must be specified as ANY. RDLENGTH
+must be non-zero and the RDATA is that of the first replacement
+record.
 
 If an RRset is to be replaced with multiple records, the second and
-subsequent records MUST use the syntax for adding an RR. If the
-replacement RR has RDLENGTH=0 then this cannot be expressed as a
-replace, so the server MUST send a delete followed by an add.
+subsequent records MUST use the syntax for adding an RR.
 
-QUESTION: do "replace" directives go in the deletions part of a
-difference sequence or in the additions part?
+The same syntax is used to delete an RRset and to replace an RRset
+with an RR whose RDLENGTH is zero. This is not ambiguous because the
+former appears in the deletion list (before the new SOA RR) and the
+latter appears in the addition list (after the new SOA RR).
 
 # Protocol Description
 
