@@ -51,7 +51,8 @@ ANY. RDLENGTH must be zero (0) and RDATA must therefore be empty.
 
 ## Other possibilities
 
-REPLACE (Johan), Grammar (Olafur) 
+REPLACE (Johan), Grammar (Olafur), Implicitly delete RRSIG of RRset (Tony),
+Get rid of NOTIFY (Tony).
 
 # Protocol Description
 
