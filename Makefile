@@ -1,49 +1,23 @@
-XML=middle.xml abstract.xml back.xml
-RFC=xml2rfc
-# This assumes double quotes in the docName!
 TITLE=$(shell grep docName template.xml | sed -e 's/.*docName=\"//' -e 's/\">//')
-.PHONY: txt html xml
 
-all:	txt 
+.PHONY: txt clean
 
-txt:	$(TITLE).txt
+all: txt
 
-html:	$(TITLE).html
+txt: $(TITLE).txt
 
-xml:	$(TITLE).xml
-
-# mkd is OK
-%.xml:	%.mkd transform.xsl
-	pandoc -t docbook -s $< | xsltproc --nonet transform.xsl - > $@
-
-# pdc is also OK
-%.xml:	%.pdc transform.xsl
-	pandoc -t docbook -s $< | xsltproc --nonet transform.xsl - > $@
-
-draft.txt:	$(XML) template.xml
-	$(RFC) template.xml -f $@ --text
-
-draft.html: 	$(XML) template.xml
-	$(RFC) template.xml -f $@ --html
-
-draft.xml:	$(XML) template.xml
-	$(RFC) template.xml -f $@ --exp
+draft.txt: *.mkd template.xml
+	pandoc2rfc *.mkd
 
 $(TITLE).txt:	draft.txt
 	ln -sf $< $@
 
-$(TITLE).html:	draft.html
-	ln -sf $< $@
+draft.xml: *.mkd template.xml
+	pandoc2rfc -X *.mkd
 
-$(TITLE).xml:	draft.xml
-	ln -sf $< $@
+draft.html: *.mkd template.xml
+	pandoc2rfc -H *.mkd
 
-nits:   $(TITLE).txt
-	if idnits --help 2>/dev/null >&2; then idnits --year $(date +%Y) --verbose $<; fi
 
 clean:
-	rm -f $(XML) *.txt *.html  $(TITLE).xml
-
-realclean:	clean
-	rm -f draft.txt draft.html draft.xml $(TITLE).txt $(TITLE).html $(TITLE).xml
-
+	rm -f *.txt 
