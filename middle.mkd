@@ -63,7 +63,7 @@ ANY. RDLENGTH must be zero (0) and RDATA must therefore be empty.
 
 ## Client side
 
-The client can send a DXFR request. Just like with IXFR, it can add a SOA
+The client can send a DXFR request. Just like with IXFR, it places a SOA
 RR in the authority section to signal the version of the zone it holds now.
 If the client does not want the server to fall back to AXFR, it MAY add
 another SOA RR in the additional section. This achieves DXFR-only behavior, 
