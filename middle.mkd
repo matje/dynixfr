@@ -142,11 +142,11 @@ than those covering type NSEC3.
 However, because RRSIG records are tightly related to its RRset we can
 introduce some additional data minimization rules.
 
-## Delete an RR or an RRset
+## Implicit RRSIG deletion
 
-When deleting an RR or a complete RRset, the DXFR client MUST also
-remove all existing RRSIG records on that RRset. This is valid for all RRtypes
-except RRSIG itself.
+When an RR or RRset is deleted or replaced, the DXFR client MUST also
+remove all existing RRSIG records on that RRset. This is valid for all
+RRtypes except RRSIG itself.
 
 ## More optimizations
 
