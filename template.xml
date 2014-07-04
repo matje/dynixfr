@@ -27,7 +27,7 @@
 <?rfc autobreaks="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc ipr="trust200902" category="exp" docName="draft-mekking-dnsext-mxfr-00">
+<rfc ipr="trust200902" category="exp" docName="draft-mekking-mixfr-00">
 <front>
 
 <title abbrev="MIXFR">Minimal Incremental Zone Transfer in DNS</title>
@@ -68,10 +68,9 @@
             </address>
         </author>
 
-        <date day='10' month='March' year='2014' />
+        <date day='4' month='July' year='2014' />
 
         <area>Internet</area>
-        <workgroup>DNSEXT</workgroup>
         <keyword>DNS</keyword>
         <keyword>IXFR</keyword>
         <abstract>

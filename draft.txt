@@ -2,21 +2,21 @@
 
 
 
-DNSEXT                                                        W. Mekking
+Network Working Group                                         W. Mekking
 Internet-Draft                                                NLnet Labs
 Intended status: Experimental                             O. Gudmundsson
-Expires: September 11, 2014                                Shinkuro Inc.
-                                                          March 10, 2014
+Expires: January 5, 2015                                   Shinkuro Inc.
+                                                            July 4, 2014
 
 
-            Dynamic Update Incremental Zone Transfer in DNS
-                    draft-mekking-dnsext-dynixfr-00
+                Minimal Incremental Zone Transfer in DNS
+                         draft-mekking-mixfr-00
 
 Abstract
 
    This document proposes extensions to the DNS protocol to provide an
    incremental zone transfer (IXFR) mechanism with dynamic update
-   (UPDATE) capabilities.
+   (UPDATE) capabilities, to make zone transfers even smaller.
 
 Status of This Memo
 
@@ -33,7 +33,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on September 11, 2014.
+   This Internet-Draft will expire on January 5, 2015.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Mekking & Gudmundsson  Expires September 11, 2014               [Page 1]
+Mekking & Gudmundsson    Expires January 5, 2015                [Page 1]
 
-Internet-Draft                   DYNIXFR                      March 2014
+Internet-Draft                    MIXFR                        July 2014
 
 
 Table of Contents
@@ -68,23 +68,23 @@ Table of Contents
      3.3.  Delete an RRset . . . . . . . . . . . . . . . . . . . . .   3
      3.4.  Delete All RRsets on a Name . . . . . . . . . . . . . . .   3
      3.5.  Delete All RRsets of a Type . . . . . . . . . . . . . . .   3
-   4.  Protocol Description  . . . . . . . . . . . . . . . . . . . .   3
-     4.1.  Client side . . . . . . . . . . . . . . . . . . . . . . .   3
+     3.6.  Replace an RRset  . . . . . . . . . . . . . . . . . . . .   4
+   4.  Protocol Description  . . . . . . . . . . . . . . . . . . . .   4
+     4.1.  Client side . . . . . . . . . . . . . . . . . . . . . . .   4
      4.2.  Server side . . . . . . . . . . . . . . . . . . . . . . .   4
    5.  Data Minimization . . . . . . . . . . . . . . . . . . . . . .   5
-     5.1.  Delete an RR or an RRset  . . . . . . . . . . . . . . . .   5
-     5.2.  Replace option  . . . . . . . . . . . . . . . . . . . . .   5
-     5.3.  More optimizations  . . . . . . . . . . . . . . . . . . .   5
-     5.4.  A more sophisticated grammar  . . . . . . . . . . . . . .   6
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .   6
-   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   6
-   9.  Changelog . . . . . . . . . . . . . . . . . . . . . . . . . .   6
-     9.1.  00  . . . . . . . . . . . . . . . . . . . . . . . . . . .   6
+     5.1.  Implicit RRSIG deletion . . . . . . . . . . . . . . . . .   5
+     5.2.  More optimizations  . . . . . . . . . . . . . . . . . . .   6
+     5.3.  A more sophisticated grammar  . . . . . . . . . . . . . .   6
+   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
+   7.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
+   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   7
+   9.  Changelog . . . . . . . . . . . . . . . . . . . . . . . . . .   7
+     9.1.  00  . . . . . . . . . . . . . . . . . . . . . . . . . . .   7
    10. References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
      10.1.  Informative References . . . . . . . . . . . . . . . . .   7
-     10.2.  Normative References . . . . . . . . . . . . . . . . . .   7
-   Appendix A.  Changelog  . . . . . . . . . . . . . . . . . . . . .   8
+     10.2.  Normative References . . . . . . . . . . . . . . . . . .   8
+   Appendix A.  Changelog  . . . . . . . . . . . . . . . . . . . . .   9
 
 1.  Introduction
 
@@ -94,25 +94,28 @@ Table of Contents
    transfer may still become very large.  For example, when many
    resource record sets (RRsets) need a re-sign, or when the NSEC3
    [RFC5155] salt is changed, an IXFR may become larger than a full zone
-   transfer (AXFR, [RFC5936]).
+   transfer (AXFR, [RFC5936]).  This is because the IXFR includes
+   complete copies of both the deleted and replacement RRSIG records.
 
    To keep the deltas small in zone transfers, we need to have a richer
    update syntax, for example like in Dynamic Update (DNS UPDATE,
-   [RFC2136].  This document introduces a new query type DXFR (dynamic
-   zone transfer) that is able to express this richer syntax.
+   [RFC2136].  This document introduces a new query type MIXFR (minimal
+   incremental zone transfer) that is able to express this richer
+   syntax.
 
    An earlier proposal to keep the zone transfers small is IXFR-ONLY
    [IXFR-ONLY], by giving the client an oppurtunity to signal the server
    that it prefers an error above a fall back to an AXFR in case the
-   server is not able to send an IXFR.
 
 
 
-
-Mekking & Gudmundsson  Expires September 11, 2014               [Page 2]
+Mekking & Gudmundsson    Expires January 5, 2015                [Page 2]
 
-Internet-Draft                   DYNIXFR                      March 2014
+Internet-Draft                    MIXFR                        July 2014
 
+
+   server is not able to send an IXFR.  However IXFR-ONLY does not
+   reduce the size of an IXFR.
 
 2.  Definitions
 
@@ -122,7 +125,7 @@ Internet-Draft                   DYNIXFR                      March 2014
 
 3.  Syntax
 
-   The syntax for IXFR is a subset of DXFR, the richer syntax fo DXFR
+   The syntax for IXFR is a subset of MIXFR.  The richer syntax of MIXFR
    allows to add or delete multiple records with one resource record
    (RR).
 
@@ -136,47 +139,67 @@ Internet-Draft                   DYNIXFR                      March 2014
 
 3.3.  Delete an RRset
 
-   Similar to DNS UPDATE, one RR is added whose NAME and TYPE are those
-   of the RRset to be deleted.  CLASS must be specified as ANY.
-   RDLENGTH must be zero (0) and RDATA must therefore be empty.
+   Similar to DNS UPDATE.  To delete an RRset, the MIXFR deletion list
+   includes an RR whose NAME and TYPE are those of the RRset to be
+   deleted.  CLASS must be specified as ANY.  RDLENGTH must be zero (0)
+   and RDATA must therefore be empty.
 
 3.4.  Delete All RRsets on a Name
 
-   Similar to DNS UPDATE, one RR is added whose NAME is that of the name
-   to be cleansed of RRsets.  TYPE must be specified as ANY.  CLASS must
-   be specified as ANY.  RDLENGTH must be zero (0) and RDATA must
-   therefore be empty.
+   Similar to DNS UPDATE.  To delete all RRSets at a name, the MIXFR
+   deletion list includes an RR at that NAME, whose TYPE must be
+   specified as ANY and CLASS must be specified as ANY.  RDLENGTH must
+   be zero (0) and RDATA must therefore be empty.
 
 3.5.  Delete All RRsets of a Type
 
-   One RR is added whose NAME is that of the apex of the zone.  TYPE
-   must be specified as the TYPE of the RRsets to be deleted.  CLASS
-   must be specified as ANY.  RDLENGTH must be zero (0) and RDATA must
-   therefore be empty.
+   The MIXFR deletion list includes an RR whose NAME is that of the apex
+   of the zone.  TYPE must be specified as the TYPE of the RRsets to be
+   deleted.  CLASS must be specified as ANY.  RDLENGTH must be zero (0)
+   and RDATA must therefore be empty.
+
+
+
+
+
+
+
+
+Mekking & Gudmundsson    Expires January 5, 2015                [Page 3]
+
+Internet-Draft                    MIXFR                        July 2014
+
+
+3.6.  Replace an RRset
+
+   The MIXFR addition list includes an RR whose NAME and TYPE are those
+   of the RRset to be replaced.  CLASS must be specified as ANY.
+   RDLENGTH must be non-zero and the RDATA is that of the first
+   replacement record.
+
+   If an RRset is to be replaced with multiple records, the second and
+   subsequent records MUST use the syntax for adding an RR.
+
+   The same syntax is used to delete an RRset and to replace an RRset
+   with an RR whose RDLENGTH is zero.  This is not ambiguous because the
+   former appears in the deletion list (before the new SOA RR) and the
+   latter appears in the addition list (after the new SOA RR).
 
 4.  Protocol Description
 
 4.1.  Client side
 
-   The client can send a DXFR request.  Just like with IXFR, it can add
+   The client can send a MIXFR request.  Just like with IXFR, it places
    a SOA RR in the authority section to signal the version of the zone
    it holds now.  If the client does not want the server to fall back to
    AXFR, it MAY add another SOA RR in the additional section.  This
-
-
-
-Mekking & Gudmundsson  Expires September 11, 2014               [Page 3]
-
-Internet-Draft                   DYNIXFR                      March 2014
-
-
-   achieves DXFR-only behavior, similar to IXFR-ONLY [IXFR-ONLY].  For
+   achieves MIXFR-only behavior, similar to IXFR-ONLY [IXFR-ONLY].  For
    example:
 
    ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 1337
    ;; flags: qr ; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
    ;; QUESTION SECTION:
-   ;; example.    IN    DXFR
+   ;; example.    IN    MIXFR
 
    ;; AUTHORITY SECTION:
    example.       IN    SOA    serial=1
@@ -184,22 +207,29 @@ Internet-Draft                   DYNIXFR                      March 2014
    ;; ADDITIONAL SECTION:
    example.       IN    SOA    serial=1
 
-             Figure 1: A DXFR request for the "example." zone.
+            Figure 1: A MIXFR request for the "example." zone.
 
 4.2.  Server side
 
-   A server receiving a dynamic zone transfer (DXFR) request will reply
-   with a DXFR.  A DXFR looks exactly like an IXFR, except there may be
-   zero or more of the new introduced syntax RRs that can add or delete
-   more records.  For "example.", the following zone transfer can be
-   send that will replace all signatures in the zone with new signatures
-   for the names "example.", "a.example.", "b.example." and
-   "c.example.":
+   A server receiving a minimal incremental zone transfer (MIXFR)
+   request will reply with a MIXFR.  A MIXFR looks exactly like an IXFR,
+   except there may be zero or more of the new introduced syntax RRs
+   that can add or delete more records.  For the zone "example.", the
+   following zone transfer can be sent that will replace all signatures
+   in the zone with new signatures for the names "example.",
+   "a.example.", "b.example." and "c.example.":
+
+
+
+Mekking & Gudmundsson    Expires January 5, 2015                [Page 4]
+
+Internet-Draft                    MIXFR                        July 2014
+
 
    ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 1337
    ;; flags: qr ; QUERY: 1, ANSWER: 9, AUTHORITY: 0, ADDITIONAL: 0
    ;; QUESTION SECTION:
-   ;; example.    IN    DXFR
+   ;; example.    IN    MIXFR
 
    ;; ANSWER SECTION:
    example.       IN    SOA    serial=3
@@ -212,19 +242,11 @@ Internet-Draft                   DYNIXFR                      March 2014
    c.example.     IN    RRSIG  rdata
    example.       IN    SOA    serial=3
 
-            Figure 2: A DXFR response for the "example." zone.
+            Figure 2: A MIXFR response for the "example." zone.
 
    The server MAY reply with an IXFR or AXFR instead.  If the server
-   does not implement DXFR it MUST return a response with NOTIMPL rcode.
-   The client MUST fallback to request IXFR or AXFR.
-
-
-
-
-Mekking & Gudmundsson  Expires September 11, 2014               [Page 4]
-
-Internet-Draft                   DYNIXFR                      March 2014
-
+   does not implement MIXFR it MUST return a response with NOTIMPL
+   rcode.  The client MUST fallback to request IXFR or AXFR.
 
 5.  Data Minimization
 
@@ -244,19 +266,23 @@ Internet-Draft                   DYNIXFR                      March 2014
    However, because RRSIG records are tightly related to its RRset we
    can introduce some additional data minimization rules.
 
-5.1.  Delete an RR or an RRset
+5.1.  Implicit RRSIG deletion
 
-   When deleting an RR or a complete RRset, the DXFR client MUST also
-   remove all existing RRSIG records on that RRset.  This is valid for
-   all RRtypes except RRSIG itself.
+   When an RR or RRset is deleted or replaced, the MIXFR client MUST
+   also remove all existing RRSIG records on that RRset.  This is valid
+   for all RRtypes except RRSIG itself.
 
-5.2.  Replace option
 
-   Instead of doing a delete RRset and add RRset, we could introduce new
-   syntax that does a replace RRset.  This can save another RR in DXFR
-   per deleted RRset.
 
-5.3.  More optimizations
+
+
+
+Mekking & Gudmundsson    Expires January 5, 2015                [Page 5]
+
+Internet-Draft                    MIXFR                        July 2014
+
+
+5.2.  More optimizations
 
    We can optimize the transfer even more, because when adding an RRset
    we duplicate a lot of owner names, class and type fields.  For
@@ -272,17 +298,9 @@ Internet-Draft                   DYNIXFR                      March 2014
    REPLACE-RRSIG <name> <type> <n> <rdata>{n}
    SOA           <serial>
 
-                Figure 5: Optimized syntax ideas for DXFR.
+                Figure 5: Optimized syntax ideas for MIXFR.
 
-
-
-
-Mekking & Gudmundsson  Expires September 11, 2014               [Page 5]
-
-Internet-Draft                   DYNIXFR                      March 2014
-
-
-5.4.  A more sophisticated grammar
+5.3.  A more sophisticated grammar
 
    REPLACE-RRSIG name <type> <n> <rdata>+
    DEL NSEC3 <nsec3param info> ?
@@ -291,7 +309,7 @@ Internet-Draft                   DYNIXFR                      March 2014
    GLUE <name> <type> <n> <rdata>+
    SOA <serial>
 
-            Figure 6: More optimizations syntax ideas for DXFR.
+           Figure 6: More optimizations syntax ideas for MIXFR.
 
    Idea: the whole way to RRset
 
@@ -299,7 +317,7 @@ Internet-Draft                   DYNIXFR                      March 2014
    REPLACE <type> <n><m><Rdata>*n <RRSIG>*m
    if only signature then n = 0
 
-          Figure 7: And more optimizations syntax ideas for DXFR.
+         Figure 7: And more optimizations syntax ideas for MIXFR.
 
    Strictly speaking we can save a few bytes by doing the following in
    RRSIG:
@@ -308,9 +326,21 @@ Internet-Draft                   DYNIXFR                      March 2014
 
    now the RRSIG parts only need to re real signature.
 
+
+
+
+
+
+
+
+Mekking & Gudmundsson    Expires January 5, 2015                [Page 6]
+
+Internet-Draft                    MIXFR                        July 2014
+
+
 6.  IANA Considerations
 
-   IANA should assign the RR type value [TBD] (decimal) for DXFR.
+   IANA should assign the RR type value [TBD] (decimal) for MIXFR.
 
 7.  Security Considerations
 
@@ -325,18 +355,6 @@ Internet-Draft                   DYNIXFR                      March 2014
 9.1.  00
 
    o  Initial document.
-
-
-
-
-
-
-
-
-Mekking & Gudmundsson  Expires September 11, 2014               [Page 6]
-
-Internet-Draft                   DYNIXFR                      March 2014
-
 
 10.  References
 
@@ -366,6 +384,16 @@ Internet-Draft                   DYNIXFR                      March 2014
    [RFC5936]  Lewis, E. and A. Hoenes, "DNS Zone Transfer Protocol
               (AXFR)", RFC 5936, June 2010.
 
+
+
+
+
+
+Mekking & Gudmundsson    Expires January 5, 2015                [Page 7]
+
+Internet-Draft                    MIXFR                        July 2014
+
+
 10.2.  Normative References
 
    [RFC1995]  Ohta, M., "Incremental Zone Transfer in DNS", RFC 1995,
@@ -389,9 +417,37 @@ Internet-Draft                   DYNIXFR                      March 2014
 
 
 
-Mekking & Gudmundsson  Expires September 11, 2014               [Page 7]
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Mekking & Gudmundsson    Expires January 5, 2015                [Page 8]
 
-Internet-Draft                   DYNIXFR                      March 2014
+Internet-Draft                    MIXFR                        July 2014
 
 
 Appendix A.  Changelog
@@ -445,4 +501,4 @@ Authors' Addresses
 
 
 
-Mekking & Gudmundsson  Expires September 11, 2014               [Page 8]
+Mekking & Gudmundsson    Expires January 5, 2015                [Page 9]
