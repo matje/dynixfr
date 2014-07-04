@@ -11,8 +11,8 @@ records.
 
 To keep the deltas small in zone transfers, we need to have a richer
 update syntax, for example like in Dynamic Update (DNS UPDATE, [](#RFC2136).
-This document introduces a new query type DXFR (dynamic zone transfer) that
-is able to express this richer syntax.
+This document introduces a new query type MIXFR (minimal incremental zone
+transfer) that is able to express this richer syntax.
 
 An earlier proposal to keep the zone transfers small is
 IXFR-ONLY [](#IXFR-ONLY), by giving the client an oppurtunity to signal
@@ -28,7 +28,7 @@ document are to be interpreted as described in [](#RFC2119).
 
 # Syntax
 
-The syntax for IXFR is a subset of DXFR. The richer syntax of DXFR allows to
+The syntax for IXFR is a subset of MIXFR. The richer syntax of MIXFR allows to
 add or delete multiple records with one resource record (RR).
 
 ## Add an RR
@@ -41,28 +41,28 @@ This works the same as with IXFR.
 
 ## Delete an RRset
 
-Similar to DNS UPDATE. To delete an RRset, the DXFR deletion list
+Similar to DNS UPDATE. To delete an RRset, the MIXFR deletion list
 includes an RR whose NAME and TYPE are those of the RRset to be
 deleted. CLASS must be specified as ANY. RDLENGTH must be zero (0) and
 RDATA must therefore be empty.
 
 ## Delete All RRsets on a Name
 
-Similar to DNS UPDATE. To delete all RRSets at a name, the DXFR
+Similar to DNS UPDATE. To delete all RRSets at a name, the MIXFR
 deletion list includes an RR at that NAME, whose TYPE must be
 specified as ANY and CLASS must be specified as ANY. RDLENGTH must be
 zero (0) and RDATA must therefore be empty.
 
 ## Delete All RRsets of a Type
 
-The DXFR deletion list includes an RR whose NAME is that of the apex
+The MIXFR deletion list includes an RR whose NAME is that of the apex
 of the zone. TYPE must be specified as the TYPE of the RRsets to be
 deleted. CLASS must be specified as ANY. RDLENGTH must be zero (0) and
 RDATA must therefore be empty.
 
 ## Replace an RRset
 
-The DXFR addition list includes an RR whose NAME and TYPE are those of
+The MIXFR addition list includes an RR whose NAME and TYPE are those of
 the RRset to be replaced. CLASS must be specified as ANY. RDLENGTH
 must be non-zero and the RDATA is that of the first replacement
 record.
@@ -79,37 +79,37 @@ latter appears in the addition list (after the new SOA RR).
 
 ## Client side
 
-The client can send a DXFR request. Just like with IXFR, it places a SOA
+The client can send a MIXFR request. Just like with IXFR, it places a SOA
 RR in the authority section to signal the version of the zone it holds now.
 If the client does not want the server to fall back to AXFR, it MAY add
-another SOA RR in the additional section. This achieves DXFR-only behavior, 
+another SOA RR in the additional section. This achieves MIXFR-only behavior, 
 similar to IXFR-ONLY [](#IXFR-ONLY). For example:
 
     ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 1337
     ;; flags: qr ; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
     ;; QUESTION SECTION:
-    ;; example.    IN    DXFR
+    ;; example.    IN    MIXFR
     
     ;; AUTHORITY SECTION:
     example.       IN    SOA    serial=1
     
     ;; ADDITIONAL SECTION:
     example.       IN    SOA    serial=1
-^[fig:a-dxfr-request::A DXFR request for the "example." zone.]
+^[fig:a-MIXFR-request::A MIXFR request for the "example." zone.]
 
 ## Server side
 
-A server receiving a dynamic zone transfer (DXFR) request will reply with
-a DXFR. A DXFR looks exactly like an IXFR, except there may be zero or more
-of the new introduced syntax RRs that can add or delete more records.
-For the zone `example.`, the following zone transfer can be sent that will
-replace all signatures in the zone with new signatures for the names
-`example.`, `a.example.`, `b.example.` and `c.example.`:
+A server receiving a minimal incremental zone transfer (MIXFR) request will
+reply with a MIXFR. A MIXFR looks exactly like an IXFR, except there may be
+zero or more of the new introduced syntax RRs that can add or delete more
+records. For the zone `example.`, the following zone transfer can be sent
+that will replace all signatures in the zone with new signatures for the
+names `example.`, `a.example.`, `b.example.` and `c.example.`:
 
     ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 1337
     ;; flags: qr ; QUERY: 1, ANSWER: 9, AUTHORITY: 0, ADDITIONAL: 0 
     ;; QUESTION SECTION:
-    ;; example.    IN    DXFR
+    ;; example.    IN    MIXFR
     
     ;; ANSWER SECTION:
     example.       IN    SOA    serial=3
@@ -121,10 +121,10 @@ replace all signatures in the zone with new signatures for the names
     b.example.     IN    RRSIG  rdata
     c.example.     IN    RRSIG  rdata
     example.       IN    SOA    serial=3   
-^[fig:a-dxfr-response::A DXFR response for the "example." zone.]
+^[fig:a-MIXFR-response::A MIXFR response for the "example." zone.]
 
 The server MAY reply with an IXFR or AXFR instead. If the server does
-not implement DXFR it MUST return a response with NOTIMPL rcode. The client
+not implement MIXFR it MUST return a response with NOTIMPL rcode. The client
 MUST fallback to request IXFR or AXFR.
 
 # Data Minimization
@@ -146,7 +146,7 @@ introduce some additional data minimization rules.
 
 ## Implicit RRSIG deletion
 
-When an RR or RRset is deleted or replaced, the DXFR client MUST also
+When an RR or RRset is deleted or replaced, the MIXFR client MUST also
 remove all existing RRSIG records on that RRset. This is valid for all
 RRtypes except RRSIG itself.
 
@@ -164,7 +164,7 @@ With such a syntax, we can do more things like
     REPLACE       <name> <type> <n> <rdata>{n}
     REPLACE-RRSIG <name> <type> <n> <rdata>{n}
     SOA           <serial>
-^[fig:optimized-xfr::Optimized syntax ideas for DXFR.]
+^[fig:optimized-xfr::Optimized syntax ideas for MIXFR.]
 
 ## A more sophisticated grammar
 
@@ -174,14 +174,14 @@ With such a syntax, we can do more things like
     REPLACE-NS <name> <n> <rdata>+
     GLUE <name> <type> <n> <rdata>+
     SOA <serial>
-^[fig:sophisticated-grammar::More optimizations syntax ideas for DXFR.]
+^[fig:sophisticated-grammar::More optimizations syntax ideas for MIXFR.]
 
 Idea: the whole way to RRset 
 
     ADD <type> <n> <m> <Rdata>+n  <RRSIG>+m 
     REPLACE <type> <n><m><Rdata>*n <RRSIG>*m 
     if only signature then n = 0 
-^[fig:whole-rrset::And more optimizations syntax ideas for DXFR.]
+^[fig:whole-rrset::And more optimizations syntax ideas for MIXFR.]
 
 Strictly speaking we can save a few bytes by doing the following in RRSIG: 
 
@@ -191,7 +191,7 @@ now the RRSIG parts only need to re real signature.
 
 # IANA Considerations
 
-IANA should assign the RR type value [TBD] (decimal) for DXFR.
+IANA should assign the RR type value [TBD] (decimal) for MIXFR.
 
 # Security Considerations
 

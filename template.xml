@@ -27,10 +27,10 @@
 <?rfc autobreaks="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc ipr="trust200902" category="exp" docName="draft-mekking-dnsext-dynixfr-00">
+<rfc ipr="trust200902" category="exp" docName="draft-mekking-dnsext-mxfr-00">
 <front>
 
-<title abbrev="DYNIXFR">Dynamic Update Incremental Zone Transfer in DNS</title>
+<title abbrev="MIXFR">Minimal Incremental Zone Transfer in DNS</title>
 
         <author initials='W.' surname='Mekking' fullname='W. (Matthijs) Mekking'>
             <organization>NLnet Labs</organization>
