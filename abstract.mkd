@@ -1,3 +1,9 @@
 This document proposes extensions to the DNS protocol to provide an
-incremental zone transfer (IXFR) mechanism with dynamic update (UPDATE)
-capabilities, to make zone transfers even smaller.
+incremental zone transfer (IXFR) mechanism that is DNSSEC aware. 
+By adding the DNSSEC awareness it is possible to reduce the size of 
+Incremental zone transfers by about half. In this draft two 
+possible approaces are examined. A minimalistic changes one that
+is more compatible with dynamic update, and a radical one that 
+is has potential for more savings and potential for more rapid zone
+disemenation. 
+

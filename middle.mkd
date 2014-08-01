@@ -10,9 +10,22 @@ the IXFR includes complete copies of both the deleted and replacement RRSIG
 records.
 
 To keep the deltas small in zone transfers, we need to have a richer
-update syntax, for example like in Dynamic Update (DNS UPDATE, [](#RFC2136).
-This document introduces a new query type MIXFR (minimal incremental zone
-transfer) that is able to express this richer syntax.
+syntax, more like what Dynamic Update (DNS UPDATE, [](#RFC2136) has.
+More importantly Zone transfer protocols should be aware of DNSSEC and
+the effect of changing an RRset on signatures i.e. signature becomes
+invalid, by simply removing the need to carry old RRSIG records in the
+zone transfer protocol we expect significant savings in data transfer,
+and processing overhead. 
+
+This document introduces a outline of two different approaches to 
+creating a new zone transfer mechanism thata  MIXFR (minimal incremental zone
+transfer) that is able to express this richer syntax and support for DNSSEC.
+The second approach ZXFR (generalized Zone Transfer) is a more radical
+one that changes the binary protocol and can use a different port to
+accomplish its task.  
+
+Agruments can be made for both approaches and each may find use in
+different DNS deployments. 
 
 An earlier proposal to keep the zone transfers small is
 IXFR-ONLY [](#IXFR-ONLY), by giving the client an oppurtunity to signal
@@ -26,41 +39,50 @@ The key words "MUST", "MUST NOT", "REQUIRED", "SHALL", "SHALL NOT",
 "SHOULD", "SHOULD NOT", "RECOMMENDED", "MAY", and "OPTIONAL" in this
 document are to be interpreted as described in [](#RFC2119).
 
-# Syntax
+# MIXFR protocol proposal 
 
-The syntax for IXFR is a subset of MIXFR. The richer syntax of MIXFR allows to
-add or delete multiple records with one resource record (RR).
+## Syntax for MIXFR
 
-## Add an RR
+The syntax for IXFR is a subset of MIXFR. The richer syntax of MIXFR
+allows to add or delete multiple records with one resource record
+(RR). The basic difference between MIXFR and IXFR is that servers will
+automatically delete the covering  RRSIG record(s) when an RRset is
+changed, thus removing the need to send old RRSIG records as part of
+IXFR delta's. The new RRSIG's can simply be added, in order to
+guarantee correct processing MIXFR requires some serialization of the
+actions performed i.e. changes to the RRset MUST be performed before
+the RRSIG is added. 
+
+### Add an RR
 
 This works the same as with IXFR.
 
-## Delete an RR
+### Delete an RR
 
 This works the same as with IXFR.
 
-## Delete an RRset
+### Delete an RRset
 
 Similar to DNS UPDATE. To delete an RRset, the MIXFR deletion list
 includes an RR whose NAME and TYPE are those of the RRset to be
 deleted. CLASS must be specified as ANY. RDLENGTH must be zero (0) and
-RDATA must therefore be empty.
+RDATA must therefore be empty. 
 
-## Delete All RRsets on a Name
+### Delete All RRsets at a Name
 
 Similar to DNS UPDATE. To delete all RRSets at a name, the MIXFR
 deletion list includes an RR at that NAME, whose TYPE must be
 specified as ANY and CLASS must be specified as ANY. RDLENGTH must be
 zero (0) and RDATA must therefore be empty.
 
-## Delete All RRsets of a Type
+### Delete All RRsets of a Type
 
 The MIXFR deletion list includes an RR whose NAME is that of the apex
 of the zone. TYPE must be specified as the TYPE of the RRsets to be
 deleted. CLASS must be specified as ANY. RDLENGTH must be zero (0) and
 RDATA must therefore be empty.
 
-## Replace an RRset
+### Replace an RRset
 
 The MIXFR addition list includes an RR whose NAME and TYPE are those of
 the RRset to be replaced. CLASS must be specified as ANY. RDLENGTH
@@ -75,9 +97,9 @@ with an RR whose RDLENGTH is zero. This is not ambiguous because the
 former appears in the deletion list (before the new SOA RR) and the
 latter appears in the addition list (after the new SOA RR).
 
-# Protocol Description
+## MIXFR Protocol effects
 
-## Client side
+### Client side
 
 The client can send a MIXFR request. Just like with IXFR, it places a SOA
 RR in the authority section to signal the version of the zone it holds now.
@@ -97,14 +119,20 @@ similar to IXFR-ONLY [](#IXFR-ONLY). For example:
     example.       IN    SOA    serial=1
 ^[fig:a-MIXFR-request::A MIXFR request for the "example." zone.]
 
-## Server side
+If a server returns an NOIMP or FORMERR error code the client should
+remember that an not attempt an MIXFR transfer for some time, and
+proceed with an IXFR request. 
+
+### Server side
 
 A server receiving a minimal incremental zone transfer (MIXFR) request will
-reply with a MIXFR. A MIXFR looks exactly like an IXFR, except there may be
-zero or more of the new introduced syntax RRs that can add or delete more
-records. For the zone `example.`, the following zone transfer can be sent
-that will replace all signatures in the zone with new signatures for the
-names `example.`, `a.example.`, `b.example.` and `c.example.`:
+reply with a MIXFR. If a server does not support MIXFR it MUST return 
+RCODE NOTIMP or FORMERR. A MIXFR looks exactly like an IXFR, except
+there may be zero or more of the new introduced syntax RRs that can
+add or delete more records. For the zone `example.`, the following
+zone transfer can be sent that will replace all signatures in the zone
+with new signatures for the names `example.`, `a.example.`,
+`b.example.` and `c.example.`: 
 
     ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 1337
     ;; flags: qr ; QUERY: 1, ANSWER: 9, AUTHORITY: 0, ADDITIONAL: 0 
@@ -127,7 +155,179 @@ The server MAY reply with an IXFR or AXFR instead. If the server does
 not implement MIXFR it MUST return a response with NOTIMPL rcode. The client
 MUST fallback to request IXFR or AXFR.
 
-# Data Minimization
+
+# ZXFR Zone Transfer Protocol 
+This proposal is a total rewrite of the syntax used for transferring
+changes to the zone(s) that two servers provide service for. This is
+an attempt to create a modern framework for the data exchange but keep
+the transfers as small as possible. The protocol is DNSSEC aware and
+any changes to an RRset will result in removal of the covering RRSIG
+record(s).
+
+The protocol is designed to be used over connection oriented protocols
+such as TCP, the protocol allows the clent and server to multiplex
+different zones into one connection, minimizing the overhead of TCP
+connections, by having a persistent connection the server can send
+client ZXFR operations on a zone as soon as the data changes on the
+server, elimiating the Notify and IXFR requests.  
+The TCP connections can easily be protected by either a transport
+security TDB. 
+
+## ZXFR client requirements 
+
+To discover if and where the Server provides ZXFR service for a
+particular zone, the client sends an DNS ZXFR message. If it gets
+an answer with RCODE=0 then the Answer section will contain an SRV
+RRset listing the server(s) and port to connect to. 
+If the answer section is empty ZXFR is not provided, and the client
+MUST fall back to other zone transfer mechanisms. 
+
+If the client is unable to open an ZXFR connection to the ports on
+the servers specified in the SRV RRset the client MUST fall back to
+other zone transfer mechanism. 
+
+The client uppon creating a ZXFR connection SHOULD send the server 
+SERIAL command for all zones it wants to receive updates for from this
+server. Client SHOULD keep track of which zones it can expect ZXFR to
+take place for and not perform refresh queries for these zones while
+the connection is active. If a client wants to check many zones it
+should limit the number of outstandig unanswered SERIAL commands. 
+If there are multiple SERIAL commands outstanding it MUST be able to
+receive answers in any order. 
+
+ZXFR client SHOULD check frequently, when it has spare cycles, if
+there is data to read from the ZXFR connection. 
+
+## ZXFR server requirements 
+
+The ZXFR DNS message OpCode is reserved to allow a client to assess
+if the server supports the protocol for a particular zone. 
+(NOTE: I guess I could just reserve a ZXFR meta type query type that
+has the same effect?) 
+
+ZXFR is provided over TCP on a port different from 53, thus a server
+that provides ZXFR needs to be able to synthesize an SRV record to
+tell client where to connect to for ZXFR. The contents of the SRV
+record MAY be for the current server or is configured to an
+specialized ZXFR server. 
+
+ZXFR server MUST remember what zones are assoiated with each
+connection, and which client this is thus it SHOULD NOT send 
+Notify to these addresses. Once a client sends a SERIAL request the
+server MUST send the client all the records requried to bring it upto
+date.  If the serial number is too old the server will tell client to
+
+ZXFR server MAY terminate the connection when ever it wants to. 
+Client that has not received any data on ZXFR connection for a long
+time (Need value) SHOULD close the connection and restablish at later
+point, if multiple IXFR's have taken place.
+
+## ZXFR probing 
+  Client that supports 
+## ZXFR syntax 
+ZXFR is a command style protocol with fields the commands are 
+single byte. 
+Common fields include 
+  Class: is the class the zone is in 2 bytes in network order
+  Serial: is the current serial number 4 bytes in network order 
+          the value 0 has a the special meaning that the client does
+          not have the zone. 
+  ZName: is the FQDN of the zone, uncompressed domain name in wire format. 
+  SName: is a name that is relative to the zone name. 
+  Code is 2 byte informational message to the other end,
+  TXT: is a single text string (i.e. less than 256 bytes) 
+     first byte is length, followed by the text. 
+  RDATA: DNS RDATA in wire format i.e. with 2 byte length code in
+        front. 
+  Counter: a 1 byte field saying how many of the follwing fields follow
+  RRsig: DNS RRSIG records RDATA 
+  RType: 2 byte RR type code 
+
+### ZONE  class serial Zname 
+The zone command sets the name and class for the zone that the
+following commands are applied to. All commands between two ZONE
+commands apply to the Zname zone in the first one. 
+
+### FULL class serial Zname 
+This instructs the client that what follows is a transfer of the whole
+zone, thus the client should treat this as AXFR but in the new 
+syntax. The only allowed commands in FULL mode is ADD_RR
+The Zone transfer ends with a FULL command with the new serial
+number. 
+
+### SERIAL class serial Zname 
+The this is the query command by the client it is saying "I have this
+zone version", upon recept the server is send back one of the following 
+   SERIAL class serial Zname
+     where serial is the same as client asked for i.e. zone version is
+     the same. 
+
+   ZONE class serial Zname 
+     where serial is higher than the client one, and followed by other 
+     commands. 
+
+   FULL class serial Zname 
+     In this case the server has elected to send client the whole
+     zone. 
+
+   ERROR class serial code Zname TXT 
+     which tells the client that the request can not be satisfied. 
+
+### ADD_RR RType Sname Counter RDATA Counter RRSIG 
+Adds a RR(s) to the RRset at Sname, or creates a new RRset. 
+Note Sname "." or 0x00 means this is a RRSet at the apex of the zone. 
+
+### DELETE_RR RType Sname Counter RDATA Counter RRSIG 
+Deletes the specified records in RDATA and updates the RRSIG 
+
+### DELETE_RRSet RType Sname
+Deletes the whole RRset 
+
+### DELETE_Name Sname 
+Deletes all RRSETs at the specified name 
+
+### REPLACE_RRset RType Sname Counter RDATA Counter RRSIG 
+This command deletes the contents of an existing RRSET and
+replaces it with the what is in the command. 
+
+### REPLACE_RRSIG RType Sname Counter RRSIG 
+This command just replaces the RRSIG's assoicated with the RType. This
+is going to be frequent command when signer refreshes signatures. 
+
+### DELETE_NSEC3 iterations Salt 
+This command deletes all NSEC3 records in the zone that match the
+specified iteraions and Salt values.  
+Iterations is a 2 byte value and single byte followed by binary data. 
+This command is to support NSEC3 resalt operations by signing
+systems, it should be issued right after NSEC3PARAM has been  updated. 
+
+### END serial class Zname
+This command tells the client that update actions on the zone are
+complete. and what the new serial number is. 
+
+### HELLO version 
+These are the first commands issued by Client, Server returns HELLO
+with the version selected. 
+This command lets the other party know which sub version of this
+protocol that end supports. The version field is a single digit
+field, the first version is 1, in the future support for a higher
+number indicates support for all lower version numbers. Client and
+Server MUST use the lower value offered client or itself.
+
+### BYE Time 
+A command sent by either party indicating that it is going to close
+the connection, the other party will ack this with a BYE command. 
+The Time value is 32 bit network order seconds until the client should 
+restablish a new connection. 
+A server that is going down may want to issue this command with
+different timer values to stagger when clients connect. 
+
+
+## ZXFR 
+Old stuff not updated YET, some of this should be pulled into earlier
+sections. 
+
+## Data Minimization
 
 The proposal described in the previous section significantly reduces the size
 of a zone transfer compared with IXFR. However, when a zone has changed its
