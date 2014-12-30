@@ -27,26 +27,26 @@
 <?rfc autobreaks="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc ipr="trust200902" category="exp" docName="draft-mekking-mixfr-00">
+<rfc ipr="trust200902" category="exp" docName="draft-mekking-mixfr-01">
 <front>
 
 <title abbrev="MIXFR">Minimal Incremental Zone Transfer in DNS</title>
 
         <author initials='W.' surname='Mekking' fullname='W. (Matthijs) Mekking'>
-            <organization>NLnet Labs</organization>
+            <organization>Dynamic Network Services Inc</organization>
 
             <address>
                 <postal>
-                    <street>Science Park 400</street>
+                    <street>150 Dow Street</street>
                     <street></street>
-                    <city>Amsterdam</city> <region></region>
-                    <code>1098 XH</code>
-                    <country>NL</country>
+                    <city>Manchester</city> <region></region>
+                    <code>NH 03101</code>
+                    <country>US</country>
                 </postal>
 
                 <phone></phone>
-                <email>matthijs@nlnetlabs.nl</email>
-                <uri>http://www.nlnetlabs.nl/</uri>
+                <email>mmekking@dyn.com</email>
+                <uri>https://www.dyn.com</uri>
             </address>
         </author>
 
@@ -68,7 +68,7 @@
             </address>
         </author>
 
-        <date day='4' month='July' year='2014' />
+        <date day='30' month='December' year='2014' />
 
         <area>Internet</area>
         <keyword>DNS</keyword>

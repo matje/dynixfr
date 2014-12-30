@@ -3,20 +3,20 @@
 
 
 Network Working Group                                         W. Mekking
-Internet-Draft                                                NLnet Labs
+Internet-Draft                              Dynamic Network Services Inc
 Intended status: Experimental                             O. Gudmundsson
-Expires: January 5, 2015                                   Shinkuro Inc.
-                                                            July 4, 2014
+Expires: July 3, 2015                                    OGUD Consulting
+                                                       December 30, 2014
 
 
                 Minimal Incremental Zone Transfer in DNS
-                         draft-mekking-mixfr-00
+                         draft-mekking-mixfr-01
 
 Abstract
 
    This document proposes extensions to the DNS protocol to provide an
    incremental zone transfer (IXFR) mechanism with dynamic update
-   (UPDATE) capabilities, to make zone transfers even smaller.
+   (UPDATE) capabilities, to keep IXFRs that deal with DNSSEC small.
 
 Status of This Memo
 
@@ -33,7 +33,7 @@ Status of This Memo
    time.  It is inappropriate to use Internet-Drafts as reference
    material or to cite them other than as "work in progress."
 
-   This Internet-Draft will expire on January 5, 2015.
+   This Internet-Draft will expire on July 3, 2015.
 
 Copyright Notice
 
@@ -53,9 +53,9 @@ Copyright Notice
 
 
 
-Mekking & Gudmundsson    Expires January 5, 2015                [Page 1]
+Mekking & Gudmundsson     Expires July 3, 2015                  [Page 1]
 
-Internet-Draft                    MIXFR                        July 2014
+Internet-Draft                    MIXFR                    December 2014
 
 
 Table of Contents
@@ -68,31 +68,29 @@ Table of Contents
      3.3.  Delete an RRset . . . . . . . . . . . . . . . . . . . . .   3
      3.4.  Delete All RRsets on a Name . . . . . . . . . . . . . . .   3
      3.5.  Delete All RRsets of a Type . . . . . . . . . . . . . . .   3
-     3.6.  Replace an RRset  . . . . . . . . . . . . . . . . . . . .   4
+     3.6.  Replace an RRset  . . . . . . . . . . . . . . . . . . . .   3
    4.  Protocol Description  . . . . . . . . . . . . . . . . . . . .   4
      4.1.  Client side . . . . . . . . . . . . . . . . . . . . . . .   4
      4.2.  Server side . . . . . . . . . . . . . . . . . . . . . . .   4
    5.  Data Minimization . . . . . . . . . . . . . . . . . . . . . .   5
      5.1.  Implicit RRSIG deletion . . . . . . . . . . . . . . . . .   5
-     5.2.  More optimizations  . . . . . . . . . . . . . . . . . . .   6
-     5.3.  A more sophisticated grammar  . . . . . . . . . . . . . .   6
-   6.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   7
-   7.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
-   8.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   7
-   9.  Changelog . . . . . . . . . . . . . . . . . . . . . . . . . .   7
-     9.1.  00  . . . . . . . . . . . . . . . . . . . . . . . . . . .   7
+   6.  IXFR Gone Wild: Even more optimized transfers . . . . . . . .   6
+     6.1.  A more sophisticated grammar  . . . . . . . . . . . . . .   6
+   7.  IANA Considerations . . . . . . . . . . . . . . . . . . . . .   6
+   8.  Security Considerations . . . . . . . . . . . . . . . . . . .   7
+   9.  Acknowledgements  . . . . . . . . . . . . . . . . . . . . . .   7
    10. References  . . . . . . . . . . . . . . . . . . . . . . . . .   7
      10.1.  Informative References . . . . . . . . . . . . . . . . .   7
-     10.2.  Normative References . . . . . . . . . . . . . . . . . .   8
-   Appendix A.  Changelog  . . . . . . . . . . . . . . . . . . . . .   9
+     10.2.  Normative References . . . . . . . . . . . . . . . . . .   7
+   Appendix A.  Changelog  . . . . . . . . . . . . . . . . . . . . .   8
 
 1.  Introduction
 
-   Incremental zone transfer (IXFR, [RFC1995]) was introduced to
+   Incremental zone transfer (IXFR, [RFC1995]) is introduced to
    efficiently transfer changed portions of a zone.  However, when a
    zone is signed with DNSSEC [RFC4033], [RFC4034], [RFC4035], the
    transfer may still become very large.  For example, when many
-   resource record sets (RRsets) need a re-sign, or when the NSEC3
+   resource record sets (RRsets) need to be re-signed, or when the NSEC3
    [RFC5155] salt is changed, an IXFR may become larger than a full zone
    transfer (AXFR, [RFC5936]).  This is because the IXFR includes
    complete copies of both the deleted and replacement RRSIG records.
@@ -106,16 +104,15 @@ Table of Contents
    An earlier proposal to keep the zone transfers small is IXFR-ONLY
    [IXFR-ONLY], by giving the client an oppurtunity to signal the server
    that it prefers an error above a fall back to an AXFR in case the
-
-
-
-Mekking & Gudmundsson    Expires January 5, 2015                [Page 2]
-
-Internet-Draft                    MIXFR                        July 2014
-
-
    server is not able to send an IXFR.  However IXFR-ONLY does not
    reduce the size of an IXFR.
+
+
+
+Mekking & Gudmundsson     Expires July 3, 2015                  [Page 2]
+
+Internet-Draft                    MIXFR                    December 2014
+
 
 2.  Definitions
 
@@ -158,24 +155,20 @@ Internet-Draft                    MIXFR                        July 2014
    deleted.  CLASS must be specified as ANY.  RDLENGTH must be zero (0)
    and RDATA must therefore be empty.
 
-
-
-
-
-
-
-
-Mekking & Gudmundsson    Expires January 5, 2015                [Page 3]
-
-Internet-Draft                    MIXFR                        July 2014
-
-
 3.6.  Replace an RRset
 
    The MIXFR addition list includes an RR whose NAME and TYPE are those
    of the RRset to be replaced.  CLASS must be specified as ANY.
    RDLENGTH must be non-zero and the RDATA is that of the first
    replacement record.
+
+
+
+
+Mekking & Gudmundsson     Expires July 3, 2015                  [Page 3]
+
+Internet-Draft                    MIXFR                    December 2014
+
 
    If an RRset is to be replaced with multiple records, the second and
    subsequent records MUST use the syntax for adding an RR.
@@ -196,18 +189,21 @@ Internet-Draft                    MIXFR                        July 2014
    achieves MIXFR-only behavior, similar to IXFR-ONLY [IXFR-ONLY].  For
    example:
 
-   ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 1337
-   ;; flags: qr ; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
-   ;; QUESTION SECTION:
-   ;; example.    IN    MIXFR
+      ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 1337
+      ;; flags: qr ; QUERY: 1, ANSWER: 0, AUTHORITY: 1, ADDITIONAL: 1
+      ;; QUESTION SECTION:
+      ;; example.    IN    MIXFR
 
-   ;; AUTHORITY SECTION:
-   example.       IN    SOA    serial=1
+      ;; AUTHORITY SECTION:
+      example.       IN    SOA    serial=1
 
-   ;; ADDITIONAL SECTION:
-   example.       IN    SOA    serial=1
+      ;; ADDITIONAL SECTION:
+      example.       IN    SOA    serial=1
 
             Figure 1: A MIXFR request for the "example." zone.
+
+   [MM] Adding a whole record is quite some overhead in bits while we
+   only signal one bit of information: to fall back or not to fall back.
 
 4.2.  Server side
 
@@ -219,28 +215,29 @@ Internet-Draft                    MIXFR                        July 2014
    in the zone with new signatures for the names "example.",
    "a.example.", "b.example." and "c.example.":
 
+      ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 1337
+      ;; flags: qr ; QUERY: 1, ANSWER: 9, AUTHORITY: 0, ADDITIONAL: 0
+      ;; QUESTION SECTION:
 
 
-Mekking & Gudmundsson    Expires January 5, 2015                [Page 4]
+
+Mekking & Gudmundsson     Expires July 3, 2015                  [Page 4]
 
-Internet-Draft                    MIXFR                        July 2014
+Internet-Draft                    MIXFR                    December 2014
 
 
-   ;; ->>HEADER<<- opcode: QUERY, rcode: NOERROR, id: 1337
-   ;; flags: qr ; QUERY: 1, ANSWER: 9, AUTHORITY: 0, ADDITIONAL: 0
-   ;; QUESTION SECTION:
-   ;; example.    IN    MIXFR
+      ;; example.    IN    MIXFR
 
-   ;; ANSWER SECTION:
-   example.       IN    SOA    serial=3
-   example.       IN    SOA    serial=1
-   example.       ANY   RRSIG
-   example.       IN    SOA    serial=3
-   example.       IN    RRSIG  rdata
-   a.example.     IN    RRSIG  rdata
-   b.example.     IN    RRSIG  rdata
-   c.example.     IN    RRSIG  rdata
-   example.       IN    SOA    serial=3
+      ;; ANSWER SECTION:
+      example.       IN    SOA    serial=3
+      example.       IN    SOA    serial=1
+      example.       ANY   RRSIG
+      example.       IN    SOA    serial=3
+      example.       IN    RRSIG  rdata
+      a.example.     IN    RRSIG  rdata
+      b.example.     IN    RRSIG  rdata
+      c.example.     IN    RRSIG  rdata
+      example.       IN    SOA    serial=3
 
             Figure 2: A MIXFR response for the "example." zone.
 
@@ -256,7 +253,7 @@ Internet-Draft                    MIXFR                        July 2014
    because you need to remove all NSEC3 records and all its
    corresponding signatures.  The first part is achieved with:
 
-   example.       ANY   NSEC3
+                        example.       ANY   NSEC3
 
            Figure 3: Record to delete all RRsets of type NSEC3.
 
@@ -277,45 +274,50 @@ Internet-Draft                    MIXFR                        July 2014
 
 
 
-Mekking & Gudmundsson    Expires January 5, 2015                [Page 5]
+
+
+
+Mekking & Gudmundsson     Expires July 3, 2015                  [Page 5]
 
-Internet-Draft                    MIXFR                        July 2014
+Internet-Draft                    MIXFR                    December 2014
 
 
-5.2.  More optimizations
+6.  IXFR Gone Wild: Even more optimized transfers
 
    We can optimize the transfer even more, because when adding an RRset
-   we duplicate a lot of owner names, class and type fields.  For
-   example. we could add an NS RRset of three records like this:
+   we duplicate a lot of owner names, class and type fields.  Instead of
+   falling back to UPDATE syntax, we can invent a new zone transfer
+   syntax.  For example. we could add an NS RRset of three records like
+   this:
 
-   ADD example. IN NS 3 ns1.example. ns2.example. ns3.example.
+        ADD example. IN NS 3 ns1.example. ns2.example. ns3.example.
 
                Figure 4: Optimized addition of an NS RRset.
 
    With such a syntax, we can do more things like
 
-   REPLACE       <name> <type> <n> <rdata>{n}
-   REPLACE-RRSIG <name> <type> <n> <rdata>{n}
-   SOA           <serial>
+                REPLACE       <name> <type> <n> <rdata>{n}
+                REPLACE-RRSIG <name> <type> <n> <rdata>{n}
+                SOA           <serial>
 
                 Figure 5: Optimized syntax ideas for MIXFR.
 
-5.3.  A more sophisticated grammar
+6.1.  A more sophisticated grammar
 
-   REPLACE-RRSIG name <type> <n> <rdata>+
-   DEL NSEC3 <nsec3param info> ?
-   REPLACE NSEC3PARAM
-   REPLACE-NS <name> <n> <rdata>+
-   GLUE <name> <type> <n> <rdata>+
-   SOA <serial>
+                  REPLACE-RRSIG name <type> <n> <rdata>+
+                  DEL NSEC3 <nsec3param info> ?
+                  REPLACE NSEC3PARAM
+                  REPLACE-NS <name> <n> <rdata>+
+                  GLUE <name> <type> <n> <rdata>+
+                  SOA <serial>
 
            Figure 6: More optimizations syntax ideas for MIXFR.
 
    Idea: the whole way to RRset
 
-   ADD <type> <n> <m> <Rdata>+n  <RRSIG>+m
-   REPLACE <type> <n><m><Rdata>*n <RRSIG>*m
-   if only signature then n = 0
+                 ADD <type> <n> <m> <Rdata>+n  <RRSIG>+m
+                 REPLACE <type> <n><m><Rdata>*n <RRSIG>*m
+                 if only signature then n = 0
 
          Figure 7: And more optimizations syntax ideas for MIXFR.
 
@@ -326,35 +328,25 @@ Internet-Draft                    MIXFR                        July 2014
 
    now the RRSIG parts only need to re real signature.
 
+7.  IANA Considerations
 
 
 
 
-
-
-
-Mekking & Gudmundsson    Expires January 5, 2015                [Page 6]
+Mekking & Gudmundsson     Expires July 3, 2015                  [Page 6]
 
-Internet-Draft                    MIXFR                        July 2014
+Internet-Draft                    MIXFR                    December 2014
 
-
-6.  IANA Considerations
 
    IANA should assign the RR type value [TBD] (decimal) for MIXFR.
 
-7.  Security Considerations
+8.  Security Considerations
 
    This document does not introduce additional security considerations.
 
-8.  Acknowledgements
+9.  Acknowledgements
 
    Johan Ihren, Tony Finch.
-
-9.  Changelog
-
-9.1.  00
-
-   o  Initial document.
 
 10.  References
 
@@ -384,16 +376,6 @@ Internet-Draft                    MIXFR                        July 2014
    [RFC5936]  Lewis, E. and A. Hoenes, "DNS Zone Transfer Protocol
               (AXFR)", RFC 5936, June 2010.
 
-
-
-
-
-
-Mekking & Gudmundsson    Expires January 5, 2015                [Page 7]
-
-Internet-Draft                    MIXFR                        July 2014
-
-
 10.2.  Normative References
 
    [RFC1995]  Ohta, M., "Incremental Zone Transfer in DNS", RFC 1995,
@@ -402,53 +384,19 @@ Internet-Draft                    MIXFR                        July 2014
    [RFC2119]  Bradner, S., "Key words for use in RFCs to Indicate
               Requirement Levels", BCP 14, RFC 2119, March 1997.
 
+
+
+
+
+
+Mekking & Gudmundsson     Expires July 3, 2015                  [Page 7]
+
+Internet-Draft                    MIXFR                    December 2014
+
+
    [RFC2136]  Vixie, P., Thomson, S., Rekhter, Y., and J. Bound,
               "Dynamic Updates in the Domain Name System (DNS UPDATE)",
               RFC 2136, April 1997.
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-Mekking & Gudmundsson    Expires January 5, 2015                [Page 8]
-
-Internet-Draft                    MIXFR                        July 2014
-
 
 Appendix A.  Changelog
 
@@ -457,19 +405,19 @@ Appendix A.  Changelog
 Authors' Addresses
 
    W. (Matthijs) Mekking
-   NLnet Labs
-   Science Park 400
-   Amsterdam  1098 XH
-   NL
+   Dynamic Network Services Inc
+   150 Dow Street
+   Manchester  NH 03101
+   US
 
-   EMail: matthijs@nlnetlabs.nl
-   URI:   http://www.nlnetlabs.nl/
+   EMail: mmekking@dyn.com
+   URI:   https://www.dyn.com
 
 
    Olafur Gudmundsson
-   Shinkuro Inc.
-   4922 Fairmont Av, Suite 250
-   Bethesda  MD 20814
+   OGUD Consulting
+   3821 Village Park Dr.
+   Chevy Chase, MD  20815
    USA
 
    EMail: ogud@ogud.com
@@ -497,8 +445,4 @@ Authors' Addresses
 
 
 
-
-
-
-
-Mekking & Gudmundsson    Expires January 5, 2015                [Page 9]
+Mekking & Gudmundsson     Expires July 3, 2015                  [Page 8]
