@@ -51,19 +51,19 @@
         </author>
 
         <author initials='O.' surname='Gudmundsson' fullname='Olafur Gudmundsson'>
-            <organization>OGUD Consulting</organization>
+            <organization>CloudFlare</organization>
 
             <address>
                 <postal>
-                    <street>3821 Village Park Dr.</street>
                     <street></street>
-                    <city>Chevy Chase</city> <region>MD</region>
-                    <code>20815</code>
+                    <street></street>
+                    <city>San Francisco</city> <region>CA</region>
+                    <code>94107</code>
                     <country>USA</country>
                 </postal>
 
                 <phone></phone>
-                <email>ogud@ogud.com</email>
+                <email>olafur@cloudflare.com</email>
                 <uri></uri>
             </address>
         </author>
