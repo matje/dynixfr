@@ -1,8 +1,8 @@
 # Introduction
 
-Incremental zone transfer (IXFR, [](#RFC1995)) is introduced to efficiently
+Incremental zone transfer (IXFR, [](#RFC1995)) was introduced to efficiently
 transfer changed portions of a zone. However, when a zone is signed with
-DNSSEC [](#RFC4033), [](#RFC4034), [](#RFC4035), the transfer may still
+DNSSEC [](#RFC4033), [](#RFC4034), [](#RFC4035), the transfer can still
 become very large. For example, when many resource record sets (RRsets) need
 to be re-signed, or when the NSEC3 [](#RFC5155) salt is changed, an IXFR may
 become larger than a full zone transfer (AXFR, [](#RFC5936)). This is because
@@ -10,14 +10,16 @@ the IXFR includes complete copies of both the deleted and replacement RRSIG
 records.
 
 To keep the deltas small in zone transfers, we need to have a richer
-update syntax, for example like in Dynamic Update (DNS UPDATE, [](#RFC2136).
+change syntax, for example like in Dynamic Update (DNS UPDATE, [](#RFC2136).
 This document introduces a new query type MIXFR (minimal incremental zone
-transfer) that is able to express this richer syntax.
+transfer) that is able to express this richer syntax. The goal of this proposal 
+is to allow small changes to be communicated over UDP, and remove as much redundant
+information from the zone transfer as possible. 
 
 An earlier proposal to keep the zone transfers small is
 IXFR-ONLY [](#IXFR-ONLY), by giving the client an oppurtunity to signal
 the server that it prefers an error above a fall back to an AXFR in case the
-server is not able to send an IXFR. However IXFR-ONLY does not reduce
+server is not able to send an IXFR. However IXFR-ONLY did not reduce
 the size of an IXFR.
 
 # Definitions
@@ -28,23 +30,31 @@ document are to be interpreted as described in [](#RFC2119).
 
 # Syntax
 
-The syntax for IXFR is a subset of MIXFR. The richer syntax of MIXFR allows to
-add or delete multiple records with one resource record (RR).
+The syntax for MIXFR is a superset of IXFR. The richer syntax of MIXFR allows to
+add or delete multiple records with one resource record (RR). MIXFR is DNSSEC aware
+thus if there is a change to RRset it knows to delete the covering RRISG(s), this saves 
+the transmission of old RRsigs. 
+
+## Implicit RRSIG deletion
+
+When an RRset is modified, the MIXFR client MUST also
+remove all existing RRSIG records on that RRset. This is valid for all
+RRtypes except RRSIG itself.
 
 ## Add an RR
 
-This works the same as with IXFR.
+This works the same as with IXFR, with implicit RRSIG delete logic added.
 
 ## Delete an RR
 
-This works the same as with IXFR.
+This works the same as with IXFR, with implicit RRSIG delete logic added.
 
 ## Delete an RRset
 
 Similar to DNS UPDATE. To delete an RRset, the MIXFR deletion list
 includes an RR whose NAME and TYPE are those of the RRset to be
 deleted. CLASS must be specified as ANY. RDLENGTH must be zero (0) and
-RDATA must therefore be empty.
+RDATA must therefore be empty. This also deletes the covering RRSIGs.
 
 ## Delete All RRsets on a Name
 
@@ -58,7 +68,7 @@ zero (0) and RDATA must therefore be empty.
 The MIXFR deletion list includes an RR whose NAME is that of the apex
 of the zone. TYPE must be specified as the TYPE of the RRsets to be
 deleted. CLASS must be specified as ANY. RDLENGTH must be zero (0) and
-RDATA must therefore be empty.
+RDATA must therefore be empty. 
 
 ## Replace an RRset
 
@@ -99,6 +109,7 @@ similar to IXFR-ONLY [](#IXFR-ONLY). For example:
 
 [MM] Adding a whole record is quite some overhead in bits while we only signal
 one bit of information: to fall back or not to fall back.
+[OG] Can we use a bit from header or OPT record? Or can we just use "Class | 0x8000" to signal that? 
 
 
 ## Server side
@@ -148,13 +159,12 @@ than those covering type NSEC3.
 However, because RRSIG records are tightly related to its RRset we can
 introduce some additional data minimization rules.
 
-## Implicit RRSIG deletion
-
-When an RR or RRset is deleted or replaced, the MIXFR client MUST also
-remove all existing RRSIG records on that RRset. This is valid for all
-RRtypes except RRSIG itself.
-
 # IXFR Gone Wild: Even more optimized transfers
+
+This section is about how to accomplish similar behavior but by doing more radical 
+change in syntax on the wire thus more changes in implementations. 
+This discussion is here for people to discuss the merits of
+different approces to the overall goal: Smaller incremental transfers with DNSSEC. 
 
 We can optimize the transfer even more, because when adding an RRset we
 duplicate a lot of owner names, class and type fields. Instead of falling
@@ -192,15 +202,26 @@ Strictly speaking we can save a few bytes by doing the following in RRSIG:
 
     KEY <alg><lables><origTTL><end-time><start-time><key-id><signer>
 
-now the RRSIG parts only need to re real signature. 
+now the RRSIG parts only needs the real crypto signature.
+
+## Other approaches
+In many cases DNS servers have many zones in common, and there are many changes in the zones each hour,
+in this case having a long lived TCP connection where the primary server can push changes to the secondary.
+This kind of protocol will require more drastic changes, thus it will be covered by a separate document.
 
 # IANA Considerations
 
-IANA should assign the RR type value [TBD] (decimal) for MIXFR.
+IANA is requested to assign the OPCODE value [TBD] (decimal) for MIXFR, in sub-registry
+"DNS OpCodes" of registry "Domain Name System (DNS) Parameters".
+
+
 
 # Security Considerations
 
 This document does not introduce additional security considerations.
+TBD explain what the security implications are as old RFC's are not
+good???
+Any MIXFR transactions should use secure channels such as IPSEC or SSH tunnel, and use TSIG for authenticaion. 
 
 # Acknowledgements
 
