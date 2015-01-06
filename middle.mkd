@@ -35,20 +35,26 @@ add or delete multiple records with one resource record (RR). MIXFR is DNSSEC aw
 thus if there is a change to RRset it knows to delete the covering RRISG(s), this saves 
 the transmission of old RRsigs. 
 
+## Implicit RRSIG deletion
+
+When an RRset is modified, the MIXFR client MUST also
+remove all existing RRSIG records on that RRset. This is valid for all
+RRtypes except RRSIG itself.
+
 ## Add an RR
 
-This works the same as with IXFR, with RRSIG delete logic added
+This works the same as with IXFR, with implicit RRSIG delete logic added.
 
 ## Delete an RR
 
-This works the same as with IXFR, with RRSIG delete logic added
+This works the same as with IXFR, with implicit RRSIG delete logic added.
 
 ## Delete an RRset
 
 Similar to DNS UPDATE. To delete an RRset, the MIXFR deletion list
 includes an RR whose NAME and TYPE are those of the RRset to be
 deleted. CLASS must be specified as ANY. RDLENGTH must be zero (0) and
-RDATA must therefore be empty. This also deletes the covering RRSIG.
+RDATA must therefore be empty. This also deletes the covering RRSIGs.
 
 ## Delete All RRsets on a Name
 
@@ -152,13 +158,6 @@ than those covering type NSEC3.
 
 However, because RRSIG records are tightly related to its RRset we can
 introduce some additional data minimization rules.
-
-## Implicit RRSIG deletion
-
-When an RRset is modified, the MIXFR client MUST also
-remove all existing RRSIG records on that RRset. This is valid for all
-RRtypes except RRSIG itself.
-[OG] Now redundant
 
 # IXFR Gone Wild: Even more optimized transfers
 
