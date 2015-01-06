@@ -10,15 +10,16 @@ the IXFR includes complete copies of both the deleted and replacement RRSIG
 records.
 
 To keep the deltas small in zone transfers, we need to have a richer
-update syntax, for example like in Dynamic Update (DNS UPDATE, [](#RFC2136).
+change syntax, for example like in Dynamic Update (DNS UPDATE, [](#RFC2136).
 This document introduces a new query type MIXFR (minimal incremental zone
 transfer) that is able to express this richer syntax. The goal of this proposal 
-is to allow small changes to be communicated over UDP. 
+is to allow small changes to be communicated over UDP, and remove as much redundant
+information from the zone transfer as possible. 
 
 An earlier proposal to keep the zone transfers small is
 IXFR-ONLY [](#IXFR-ONLY), by giving the client an oppurtunity to signal
 the server that it prefers an error above a fall back to an AXFR in case the
-server is not able to send an IXFR. However IXFR-ONLY does not reduce
+server is not able to send an IXFR. However IXFR-ONLY did not reduce
 the size of an IXFR.
 
 # Definitions
@@ -29,7 +30,7 @@ document are to be interpreted as described in [](#RFC2119).
 
 # Syntax
 
-The syntax for IXFR is a subset of MIXFR. The richer syntax of MIXFR allows to
+The syntax for MIXFR is a superset of IXFR. The richer syntax of MIXFR allows to
 add or delete multiple records with one resource record (RR). MIXFR is DNSSEC aware
 thus if there is a change to RRset it knows to delete the covering RRISG(s), this saves 
 the transmission of old RRsigs. 
@@ -202,17 +203,26 @@ Strictly speaking we can save a few bytes by doing the following in RRSIG:
 
     KEY <alg><lables><origTTL><end-time><start-time><key-id><signer>
 
-now the RRSIG parts only need to re real signature. 
+now the RRSIG parts only needs the real crypto signature.
+
+## Other approaches
+In many cases DNS servers have many zones in common, and there are many changes in the zones each hour,
+in this case having a long lived TCP connection where the primary server can push changes to the secondary.
+This kind of protocol will require more drastic changes, thus it will be covered by a separate document.
 
 # IANA Considerations
 
-IANA should assign the RR type value [TBD] (decimal) for MIXFR.
+IANA is requested to assign the OPCODE value [TBD] (decimal) for MIXFR, in sub-registry
+"DNS OpCodes" of registry "Domain Name System (DNS) Parameters".
+
+
 
 # Security Considerations
 
 This document does not introduce additional security considerations.
 TBD explain what the security implications are as old RFC's are not
 good???
+Any MIXFR transactions should use secure channels such as IPSEC or SSH tunnel, and use TSIG for authenticaion. 
 
 # Acknowledgements
 
