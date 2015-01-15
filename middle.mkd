@@ -204,7 +204,7 @@ This document does not introduce additional security considerations. Or does it?
 
 Should we explain what the security implications are, because descriptions from old RFC's are not good enough?
 
-Any MIXFR transactions should use secure channels such as IPSEC or SSH tunnel, and use TSIG for authenticaion. 
+Any MIXFR transactions should use secure channels such as IPSEC or SSH tunnel, and use TSIG for authentication.
 
 # Acknowledgements
 
