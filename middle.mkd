@@ -142,29 +142,12 @@ The server MAY reply with an IXFR or AXFR instead. If the server does
 not implement MIXFR it MUST return a response with NOTIMPL rcode. The client
 MUST fallback to request IXFR or AXFR.
 
-# Data Minimization
-
-The proposal described in the previous section significantly reduces the size
-of a zone transfer compared with IXFR. However, when a zone has changed its
-NSEC3 salt, the impact is less impressive. This is because you need to
-remove all NSEC3 records and all its corresponding signatures. The first
-part is achieved with:
-
-    example.       ANY   NSEC3
-^[fig:delete-all-nsec3::Record to delete all RRsets of type NSEC3.]
-
-But we can't do the same for part two, because there are other signatures
-than those covering type NSEC3.
-
-However, because RRSIG records are tightly related to its RRset we can
-introduce some additional data minimization rules.
-
 # IXFR Gone Wild: Even more optimized transfers
 
 This section is about how to accomplish similar behavior but by doing more radical 
 change in syntax on the wire thus more changes in implementations. 
-This discussion is here for people to discuss the merits of
-different approces to the overall goal: Smaller incremental transfers with DNSSEC. 
+This is here for people to discuss the merits of
+different approaches to the overall goal: Smaller incremental transfers with DNSSEC. 
 
 We can optimize the transfer even more, because when adding an RRset we
 duplicate a lot of owner names, class and type fields. Instead of falling
@@ -183,7 +166,6 @@ With such a syntax, we can do more things like
 
 ## A more sophisticated grammar
 
-    REPLACE-RRSIG name <type> <n> <rdata>+ 
     DEL NSEC3 <nsec3param info> ? 
     REPLACE NSEC3PARAM 
     REPLACE-NS <name> <n> <rdata>+
@@ -191,11 +173,11 @@ With such a syntax, we can do more things like
     SOA <serial>
 ^[fig:sophisticated-grammar::More optimizations syntax ideas for MIXFR.]
 
-Idea: the whole way to RRset 
+Another idea: the whole way to present the complete RRset 
 
-    ADD <type> <n> <m> <Rdata>+n  <RRSIG>+m 
-    REPLACE <type> <n><m><Rdata>*n <RRSIG>*m 
-    if only signature then n = 0 
+    ADD <type> <n> <m> <Rdata>{n} <RRSIG>{m}
+    REPLACE <type> <n> <m> <Rdata>{n} <RRSIG>{m}
+    if only signatures then n = 0 
 ^[fig:whole-rrset::And more optimizations syntax ideas for MIXFR.]
 
 Strictly speaking we can save a few bytes by doing the following in RRSIG: 
@@ -205,9 +187,10 @@ Strictly speaking we can save a few bytes by doing the following in RRSIG:
 now the RRSIG parts only needs the real crypto signature.
 
 ## Other approaches
+
 In many cases DNS servers have many zones in common, and there are many changes in the zones each hour,
 in this case having a long lived TCP connection where the primary server can push changes to the secondary.
-This kind of protocol will require more drastic changes, thus it will be covered by a separate document.
+This kind of protocol will require more drastic changes, thus it will be covered by a separate, future document.
 
 # IANA Considerations
 
@@ -215,12 +198,12 @@ IANA is requested to assign the OPCODE value [TBD] (decimal) for MIXFR, in sub-r
 "DNS OpCodes" of registry "Domain Name System (DNS) Parameters".
 
 
-
 # Security Considerations
 
-This document does not introduce additional security considerations.
-TBD explain what the security implications are as old RFC's are not
-good???
+This document does not introduce additional security considerations. Or does it?
+
+Should we explain what the security implications are, because descriptions from old RFC's are not good enough?
+
 Any MIXFR transactions should use secure channels such as IPSEC or SSH tunnel, and use TSIG for authenticaion. 
 
 # Acknowledgements
