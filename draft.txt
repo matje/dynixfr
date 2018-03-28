@@ -4,7 +4,7 @@
 
 Network Working Group                                         W. Mekking
 Internet-Draft                                              Oracle + Dyn
-Intended status: Experimental                             O. Gudmundsson
+Intended status: Standards Track                          O. Gudmundsson
 Expires: September 29, 2018                                   CloudFlare
                                                           March 28, 2018
 
