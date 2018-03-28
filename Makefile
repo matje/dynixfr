@@ -6,18 +6,17 @@ all: txt
 
 txt: $(TITLE).txt
 
-draft.txt: *.mkd template.xml
-	pandoc2rfc *.mkd
+draft.txt: *.mkd template.xml draft.xml
+	xml2rfc template.xml -o draft.txt --text
 
 $(TITLE).txt:	draft.txt
 	ln -sf $< $@
 
 draft.xml: *.mkd template.xml
-	pandoc2rfc -X *.mkd
-
-draft.html: *.mkd template.xml
-	pandoc2rfc -H *.mkd
-
+	pandoc -t docbook -s middle.mkd | xsltproc --nonet transform.xsl - > middle.xml
+	pandoc -t docbook -s back.mkd | xsltproc --nonet transform.xsl - > back.xml
+	pandoc -t docbook -s abstract.mkd | xsltproc --nonet transform.xsl - > abstract.xml
 
 clean:
-	rm -f *.txt 
+	rm -f *.txt
+	rm middle.xml back.xml abstract.xml
