@@ -175,5 +175,5 @@ and use TSIG for authentication.
 
 # Acknowledgements
 
-Johan Ihren, Tony Finch, Bob Harold.
+Johan Ihren, Tony Finch, Bob Harold, Pieter Lexis.
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## Version 03
+
+* Update IANA section to not request OPCODE but RRtype.
+
 ## Version 02
 
 * Removed 'Delete All RRsets of a Type' because it had the same syntax as
