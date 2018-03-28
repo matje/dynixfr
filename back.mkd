@@ -3,8 +3,10 @@
 ## Version 02
 
 * Removed 'Delete All RRsets of a Type' because it had the same syntax as
-  'Delete an RRset' [Olafur]
-* Clarify ANY CLASS [#5, Bob Harold]
+  'Delete an RRset' [Olafur].
+* Clarify ANY CLASS [#5, Bob Harold].
+* Sleep for 3 years.
+* Remove IXFR Gone Wild section.
 
 ## Version 01
 
