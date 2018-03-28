@@ -33,15 +33,15 @@
 <title abbrev="MIXFR">Minimal Incremental Zone Transfer in DNS</title>
 
         <author initials='W.' surname='Mekking' fullname='W. (Matthijs) Mekking'>
-            <organization>Oracle + Dyn</organization>
+            <organization>Oracle Dyn</organization>
 
             <address>
                 <postal>
-                    <street>150 Dow Street</street>
+                    <street>Hertogswetering 163-167</street>
                     <street></street>
-                    <city>Manchester</city> <region></region>
-                    <code>NH 03101</code>
-                    <country>US</country>
+                    <city>Utrecht</city> <region></region>
+                    <code>3543 AS Utrecht</code>
+                    <country>NL</country>
                 </postal>
 
                 <phone></phone>

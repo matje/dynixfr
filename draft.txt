@@ -3,7 +3,7 @@
 
 
 Network Working Group                                         W. Mekking
-Internet-Draft                                              Oracle + Dyn
+Internet-Draft                                                Oracle Dyn
 Intended status: Standards Track                          O. Gudmundsson
 Expires: September 29, 2018                                   CloudFlare
                                                           March 28, 2018
@@ -418,12 +418,12 @@ A.3.  Version 00
 Authors' Addresses
 
    W. (Matthijs) Mekking
-   Oracle + Dyn
-   150 Dow Street
-   Manchester  NH 03101
-   US
+   Oracle Dyn
+   Hertogswetering 163-167
+   Utrecht  3543 AS Utrecht
+   NL
 
-   EMail: mmekking@dyn.com
+   EMail: matthijs.mekking@oracle.com
    URI:   https://www.dyn.com
 
 
