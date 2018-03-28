@@ -33,7 +33,7 @@
 <title abbrev="MIXFR">Minimal Incremental Zone Transfer in DNS</title>
 
         <author initials='W.' surname='Mekking' fullname='W. (Matthijs) Mekking'>
-            <organization>Dynamic Network Services Inc</organization>
+            <organization>Oracle + Dyn</organization>
 
             <address>
                 <postal>
@@ -68,7 +68,7 @@
             </address>
         </author>
 
-        <date day='9' month='March' year='2015' />
+        <date day='28' month='March' year='2018' />
 
         <area>Internet</area>
         <keyword>DNS</keyword>
