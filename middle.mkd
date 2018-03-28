@@ -142,57 +142,20 @@ The server MAY reply with an IXFR or AXFR instead. If the server does
 not implement MIXFR it MUST return a response with NOTIMPL rcode. The client
 MUST fallback to request IXFR or AXFR.
 
-# IXFR Gone Wild: Even more optimized transfers
-
-This section is about how to accomplish similar behavior but by doing more
-radical change in syntax on the wire thus more changes in implementations. 
-This is here for people to discuss the merits of different approaches to the
-overall goal: Smaller incremental transfers with DNSSEC. 
-
-We can optimize the transfer even more, because when adding an RRset we
-duplicate a lot of owner names, class and type fields. Instead of falling
-back to UPDATE syntax, we can invent a new zone transfer syntax.
-For example. we could add an NS RRset of three records like this:
-
-    ADD example. IN NS 3 ns1.example. ns2.example. ns3.example.
-^[fig:add-ns-rrset::Optimized addition of an NS RRset.]
-
-With such a syntax, we can do more things like
-
-    REPLACE       <name> <type> <n> <rdata>{n}
-    REPLACE-RRSIG <name> <type> <n> <rdata>{n}
-    SOA           <serial>
-^[fig:optimized-xfr::Optimized syntax ideas for MIXFR.]
-
-## A more sophisticated grammar
-
-    DEL NSEC3 <nsec3param info> ? 
-    REPLACE NSEC3PARAM 
-    REPLACE-NS <name> <n> <rdata>+
-    GLUE <name> <type> <n> <rdata>+
-    SOA <serial>
-^[fig:sophisticated-grammar::More optimizations syntax ideas for MIXFR.]
-
-Another idea: the whole way to present the complete RRset 
-
-    ADD <type> <n> <m> <Rdata>{n} <RRSIG>{m}
-    REPLACE <type> <n> <m> <Rdata>{n} <RRSIG>{m}
-    if only signatures then n = 0 
-^[fig:whole-rrset::And more optimizations syntax ideas for MIXFR.]
-
-Strictly speaking we can save a few bytes by doing the following in RRSIG: 
-
-    KEY <alg><lables><origTTL><end-time><start-time><key-id><signer>
-
-now the RRSIG parts only needs the real crypto signature.
-
-## Other approaches
+## Future zone transfer improvements
 
 In many cases DNS servers have many zones in common, and there are many
 changes in the zones each hour, in this case having a long lived TCP
-connection where the primary server can push changes to the secondary. This
-kind of protocol will require more drastic changes, thus it will be covered by
-a separate, future document.
+connection or an out-of-band protocol where the primary server can push
+changes to the secondary.
+
+The size of the zone transfer can be reduced even more if the syntax
+on the wire is changed, i.e. the RR wire format is abandoned. A different
+grammar may add operators, remove duplicate RRset owner names, and use
+standard compression algorithms.
+
+These kind of improvements will require more drastic changes, and may
+be covered in a separate, future document.
 
 # IANA Considerations
 
