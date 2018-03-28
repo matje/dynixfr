@@ -159,8 +159,8 @@ be covered in a separate, future document.
 
 # IANA Considerations
 
-IANA is requested to assign the OPCODE value [TBD] (decimal) for MIXFR, in
-sub-registry "DNS OpCodes" of registry "Domain Name System (DNS) Parameters".
+IANA is requested to assign the RR Type value [TBD] (decimal) for MIXFR, in
+sub-registry "Resource Record (RR) TYPEs" of registry "Domain Name System (DNS) Parameters".
 
 # Security Considerations
 
