@@ -212,5 +212,5 @@ and use TSIG for authentication.
 
 # Acknowledgements
 
-Johan Ihren, Tony Finch.
+Johan Ihren, Tony Finch, Bob Harold.
 
