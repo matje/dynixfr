@@ -27,7 +27,7 @@
 <?rfc autobreaks="yes"?>
 <?rfc compact="yes"?>
 <?rfc subcompact="no"?>
-<rfc ipr="trust200902" category="std" docName="draft-mekking-mixfr-02">
+<rfc ipr="trust200902" category="std" docName="draft-mekking-mixfr-03">
 <front>
 
 <title abbrev="MIXFR">Minimal Incremental Zone Transfer in DNS</title>
@@ -51,7 +51,7 @@
         </author>
 
         <author initials='O.' surname='Gudmundsson' fullname='Olafur Gudmundsson'>
-            <organization>CloudFlare</organization>
+            <organization>Cloudflare</organization>
 
             <address>
                 <postal>
