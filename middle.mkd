@@ -73,15 +73,15 @@ zero (0) and RDATA must therefore be empty.
 
 The MIXFR addition list includes an RR whose NAME and TYPE are those of
 the RRset to be replaced. CLASS must be specified as ANY. RDLENGTH
-must be non-zero and the RDATA is that of the first replacement
-record.
+is the length of the RDATA and the RDATA is that of the first
+replacement record.
 
 If an RRset is to be replaced with multiple records, the second and
 subsequent records MUST use the syntax for adding an RR.
 
-The same syntax is used to delete an RRset and to replace an RRset
-with an RR whose RDLENGTH is zero. This is not ambiguous because the
-former appears in the deletion list (before the new SOA RR) and the
+Note that the same syntax is used to delete an RRset and to replace an
+RRset with an RR whose RDLENGTH is zero. This is not ambiguous because
+the former appears in the deletion list (before the new SOA RR) and the
 latter appears in the addition list (after the new SOA RR).
 
 # Protocol Description
