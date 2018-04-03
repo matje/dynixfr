@@ -35,11 +35,13 @@ to add or delete multiple records with one resource record (RR). MIXFR is
 DNSSEC aware thus if there is a change to RRset it knows to delete the
 covering RRISG(s), this saves the transmission of old RRsigs. 
 
-## Implicit RRSIG deletion
+## Implicit DNSSEC deletions
 
 When an RRset is modified, the MIXFR client MUST also
 remove all existing RRSIG records on that RRset. This is valid for all
 RRtypes except RRSIG itself.
+
+When an NSEC3PARAM is deleted or replaced, the MIXFR client MUST also remove all existing NSEC3 records on the zone that form the chain related to the deleted or replaced salt.
 
 ## Add an RR
 
