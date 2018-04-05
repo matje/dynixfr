@@ -33,12 +33,12 @@ document are to be interpreted as described in [](#RFC2119).
 
 The syntax for MIXFR is a superset of IXFR. The richer syntax of MIXFR allows
 to add or delete multiple records with one resource record (RR). MIXFR is
-DNSSEC aware thus if there is a change to RRset it knows to delete the
-covering RRISG(s), this saves the transmission of old RRsigs. 
+DNSSEC aware thus if there is a deletion to a RRset it knows to delete the
+covering RRSIG(s), this saves the transmission of old RRsigs. 
 
 ## Implicit RRSIG deletion
 
-When an RRset is modified, the MIXFR client MUST also
+When a RRset is deleted, the MIXFR client MUST also
 remove all existing RRSIG records on that RRset. This is valid for all
 RRtypes except RRSIG itself.
 
@@ -53,11 +53,11 @@ it intends to remove the complete corresponding NSEC3 chain.
 
 ## Add an RR
 
-This works the same as with IXFR, with implicit RRSIG delete logic added.
+This works the same as with IXFR.
 
 ## Delete an RR
 
-This works the same as with IXFR, with implicit RRSIG delete logic added.
+This works the same as with IXFR, with implicit RRSIG deletion logic added when this concludes a RRset removal.
 
 ## Delete an RRset
 
