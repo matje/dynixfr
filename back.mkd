@@ -2,12 +2,15 @@
 
 ## Version 03
 
-* Update IANA section to not request OPCODE but RRtype.
+* Accept proposed text from Tony Finch in introduction.
+* Drop requirement RDLENGTH non-zero for Replace RRset. [#12, Richard Gibson]
+* Update IANA section to not request OPCODE but RRtype. [#13, Pieter Lexis]
+* Add NSEC3 Implicit Deletion. [#8, Frederico Neves]
 
 ## Version 02
 
 * Removed 'Delete All RRsets of a Type' because it had the same syntax as
-  'Delete an RRset' [Olafur].
+  'Delete an RRset' [NOISSUE, Olafur Gudmundsson].
 * Clarify ANY CLASS [#5, Bob Harold].
 * Sleep for 3 years.
 * Remove IXFR Gone Wild section.
